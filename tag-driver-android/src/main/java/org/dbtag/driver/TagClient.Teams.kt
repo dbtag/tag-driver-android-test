@@ -21,7 +21,7 @@ data class Team(val team: Tag, val members: List<U2>, val managers: List<U2>,
 /**
  * Gets all [Team]s in alphabetical team-name order
  */
-suspend fun Queue.getTeams() = suspendCoroutine<List<Team>> { cont-> getTeams(cont) }
+suspend fun UserQueue.getTeams() = suspendCoroutine<List<Team>> { cont-> getTeams(cont) }
 
 
 enum class FollowMethod { Unknown, NoFollow, Follow, FollowWithNotifications }
@@ -29,7 +29,7 @@ enum class FollowMethod { Unknown, NoFollow, Follow, FollowWithNotifications }
 /**
  * Gets all [Team]s
  */
-fun Queue.getTeams(cont: Continuation<List<Team>>) {
+fun UserQueue.getTeams(cont: Continuation<List<Team>>) {
     select(Filter(listOf(Tag("team")), listOf(Tag("sys.n"))), 0, Filter.empty, 100000, 0, false, Parts.Content, { it.content }, null,
             object : Continuation<TAndMs<MessagesData<String>>> {
                 override val context = EmptyCoroutineContext
@@ -151,12 +151,12 @@ fun Queue.getTeams(cont: Continuation<List<Team>>) {
 ///**
 // * Gets all [Team]s in alphabetical team-name order
 // */
-//suspend fun Queue.getTeams() = suspendCoroutine<List<Team>> { cont-> getTeams(cont) }
+//suspend fun UserQueue.getTeams() = suspendCoroutine<List<Team>> { cont-> getTeams(cont) }
 //
 ///**
 // * Gets all [Team]s
 // */
-//fun Queue.getTeams(cont: Continuation<List<Team>>) {
+//fun UserQueue.getTeams(cont: Continuation<List<Team>>) {
 //    select(Filter().require("team").exclude("sys.f"), 0, Filter.empty,  1000, 0, true, Parts.Content, { it.messageContent}, null,
 //            object : Continuation<MessagesData<String>> {
 //                override val context: CoroutineContext = EmptyCoroutineContext

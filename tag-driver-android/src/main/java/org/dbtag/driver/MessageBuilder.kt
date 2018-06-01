@@ -86,17 +86,17 @@ class MessageBuilder {
     }
 }
 
-suspend fun Queue.insert(message: MessageBuilder) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(message, cont) }
+suspend fun UserQueue.insert(message: MessageBuilder) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(message, cont) }
 
-private fun Queue.insert(message: MessageBuilder, cont: Continuation<TAndMs<IntArray>>) {
+private fun UserQueue.insert(message: MessageBuilder, cont: Continuation<TAndMs<IntArray>>) {
     // TODO: any mb attachments are not passed
     val text = message.writeShort()
     insert(text, cont = cont)
 }
 
-suspend fun Queue.insert(text: String, vararg attachments: ByteArray) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(text, *attachments, cont = cont) }
+suspend fun UserQueue.insert(text: String, vararg attachments: ByteArray) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(text, *attachments, cont = cont) }
 
-internal fun Queue.insert(text: String, vararg attachments: ByteArray, cont: Continuation<TAndMs<IntArray>>) {
+internal fun UserQueue.insert(text: String, vararg attachments: ByteArray, cont: Continuation<TAndMs<IntArray>>) {
     queue({
         with(getWriter(TagClient.Insert)) {
             writeField(1, text)  // TEXT

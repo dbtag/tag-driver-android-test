@@ -1,9 +1,6 @@
 package org.dbtag.data
 
-import org.dbtag.driver.Parts
-import org.dbtag.driver.Queue
-import org.dbtag.driver.TAndMs
-import org.dbtag.driver.select
+import org.dbtag.driver.*
 import java.util.concurrent.Executor
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -75,13 +72,13 @@ class Message(args: MessageConstructArgs) : MidiMessage(args) {
 
         const val parts = Parts.All
 
-        suspend fun select(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
+        suspend fun select(queue: UserQueue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
                            desc: Boolean = false, executor: Executor? = null) = suspendCoroutine< TAndMs<MessagesData<Message>>> { cont->
             select(queue, filter, limit, ifUpdatedAfter, desc, executor, cont)
         }
 
-        fun select(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
-                         desc: Boolean = false, executor: Executor? = null, cont: Continuation<TAndMs<MessagesData<Message>>>) {
+        fun select(queue: UserQueue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
+                   desc: Boolean = false, executor: Executor? = null, cont: Continuation<TAndMs<MessagesData<Message>>>) {
             queue.select(filter, 0, Filter.empty, limit, ifUpdatedAfter, desc, Parts.All, { args: MessageConstructArgs ->
                 Message(args)
             }, executor, cont)

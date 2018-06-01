@@ -7,14 +7,14 @@ import kotlin.coroutines.experimental.EmptyCoroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
-//suspend fun Queue.getLastMessageFirstThumbnail(toFilter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache)
+//suspend fun UserQueue.getLastMessageFirstThumbnail(toFilter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache)
 //        = suspendCoroutine<ByteArray> { cont->
 //    getLastMessageFirstThumbnail(toFilter, maxSize, thumbnailCache, cont)
 //}
 
 // TODO: It would be nicer to do this in just one coms action using a new feature of select that returns attachment bytes in place
 // and also shrinks any bitmaps to the maxsize...
-fun Queue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<ByteArray?>) {
+fun UserQueue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<ByteArray?>) {
     // Get the mid of the most recent message tagging these required tags and then look up that message's item1 attachment bitmap, if any
     MessageMid.select(this, filter, 1, desc = true, cont = object: Continuation<TAndMs<MessagesData<MessageMid>>>{
         override val context get() = EmptyCoroutineContext
@@ -31,7 +31,7 @@ fun Queue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCa
 
 
 //// TODO: It would be nicer to do this in just one coms action using a new server feature
-//fun Queue.getLastMessageFirstAttachment(toFilter: Filter, callback: ResultCallback<Attachment>) {
+//fun UserQueue.getLastMessageFirstAttachment(toFilter: Filter, callback: ResultCallback<Attachment>) {
 //    // Get the mid of the most recent message tagging these required tags
 //    select(toFilter, 1, 0, true, MessageMid.parts, MessageMid.construct, { _, result ->
 //        if (result != null) {
@@ -46,13 +46,13 @@ fun Queue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCa
 //}
 
 
-suspend fun <T> Queue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
+suspend fun <T> UserQueue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
                                 includeZeroValue: Boolean, lastMessageParts: Int, cons: (Tag, Long, MessageConstructArgs?) -> T) = suspendCoroutine<TAndMs<Pair<Long, List<T>>>> { cont ->
     lastValue(filter, ifUpdatedAfter, valueTag, excludeTag, excludeTopic, includeZeroValue, lastMessageParts, cons, cont)
 }
 
 // TODO: what about "joins() As Join"  ?
-fun <T> Queue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
+fun <T> UserQueue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
                               includeZeroValue: Boolean, lastMessageParts: Int, cons: (Tag, Long, MessageConstructArgs?) -> T,
                               cont: Continuation<TAndMs<Pair<Long, List<T>>>>) {
     queue({
@@ -141,7 +141,7 @@ fun <T> Queue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, 
 
 
 // Specifics
-//suspend fun <T> Queue.users(toFilter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int, cons: (YLabel, Long, MessageConstructArgs?) -> T)
+//suspend fun <T> UserQueue.users(toFilter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int, cons: (YLabel, Long, MessageConstructArgs?) -> T)
 //        = suspendCoroutine<Pair<Long, List<T>>> { cont ->
 //    lastValue(toFilter, ifUpdatedAfter, "sys.liveuser", null, null, false, lastMessageParts, cons, cont)
 //}
@@ -165,7 +165,7 @@ fun <T> Queue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, 
 //}
 //
 //// Simple versions
-//suspend fun Queue.users() = suspendCoroutine<List<YLabel>> { cont ->
+//suspend fun UserQueue.users() = suspendCoroutine<List<YLabel>> { cont ->
 //    lastValue(Filter.empty, 0L, "sys.liveuser", null, null, false, 0, { tn, _, _ -> tn},
 //      object: Continuation<Pair<Long, List<YLabel>>> {
 //        override val context = cont.context
@@ -195,7 +195,7 @@ fun <T> Queue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, 
 //}
 
 //// TODO: followedBy is not correct
-//suspend fun Queue.followedBy(tag: String) = suspendCoroutine<Array<YLabel>> { cont->
+//suspend fun UserQueue.followedBy(tag: String) = suspendCoroutine<Array<YLabel>> { cont->
 //    select(Filter().require("sys.follow", tag), 0, Filter.empty, Integer.MAX_VALUE, 0, true,
 //               MessageTagsNotInFilter.parts, MessageTagsNotInFilter.construct, null,
 //        object : Continuation<MessagesData<MessageTagsNotInFilter>> {

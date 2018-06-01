@@ -19,5 +19,7 @@ class MainActivity : AppCompatActivity() {
             Log.i("ms", ms.toString() + " " + databases)
         }
 
+        Log.i("first", "!")
+
     }
 }

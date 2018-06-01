@@ -30,18 +30,18 @@ object Parts {
     const val All = Integer.MAX_VALUE and (FirstThumbnail).inv()
 }
 
-suspend fun <T>Queue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
+suspend fun <T>UserQueue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
                             desc: Boolean, parts: Int, cons: (MessageConstructArgs) -> T, executor: Executor?=null) = suspendCoroutine<TAndMs<MessagesData<T>>> { cont->
     select({getSelectWriteBytes(filter, limit, ifUpdatedAfter, desc, parts)}, cons, executor, cont)
 }
 
-fun <T>Queue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
+fun <T>UserQueue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
                     desc: Boolean, parts: Int, cons: (MessageConstructArgs) -> T, executor: Executor?, cont: Continuation<TAndMs<MessagesData<T>>>) {
     select({getSelectWriteBytes(filter, limit, ifUpdatedAfter, desc, parts)}, cons, executor, cont)
 }
 
 
-internal fun Queue.getSelectWriteBytes(filter: Filter, limit: Int, ifUpdatedAfter: Long,
+internal fun UserQueue.getSelectWriteBytes(filter: Filter, limit: Int, ifUpdatedAfter: Long,
                                       desc: Boolean, parts: Int) =
         with(getWriter(TagClient.Select)) {
     //        val JOIN = 2  // TODO: not used right now !
@@ -64,10 +64,10 @@ internal fun Queue.getSelectWriteBytes(filter: Filter, limit: Int, ifUpdatedAfte
             toByteArray()
         }
 
-//private suspend fun Queue.select(byteArray: ByteArray, toFilter: Filter, cons: (MessageConstructArgs) -> Any)
+//private suspend fun UserQueue.select(byteArray: ByteArray, toFilter: Filter, cons: (MessageConstructArgs) -> Any)
 //        = suspendCoroutine<messagesData> { cont-> select(byteArray, toFilter, cons, cont) }
 
-internal fun <T>Queue.select(byteArray: () -> ByteArray, cons: (MessageConstructArgs) -> T, executor: Executor?, cont: Continuation<TAndMs<MessagesData<T>>>) {
+internal fun <T>UserQueue.select(byteArray: () -> ByteArray, cons: (MessageConstructArgs) -> T, executor: Executor?, cont: Continuation<TAndMs<MessagesData<T>>>) {
     var elapsedTime: Long = 0
     queue({
         // Take a note of the time now our coms is about to happen

@@ -26,7 +26,7 @@ class TagUnsignedInClient(val socket: SendReceiveQueue) : Queue {
                 override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
             })
 
-    override fun getWriter(command: Int) = BinaryWriter().apply { writeVarint(command.toLong()) }
+    override fun getWriter0(command: Int) = BinaryWriter().apply { writeVarint(command.toLong()) }
 
     constructor(server: String, port: Int = 3468) : this(SharedClients.inst.get(server, port))
 }

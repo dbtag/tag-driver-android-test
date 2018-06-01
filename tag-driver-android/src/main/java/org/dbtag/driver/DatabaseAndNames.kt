@@ -6,11 +6,11 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.databases() = suspendCoroutine<TAndMs<ServerDatabases>> { cont-> databases(cont) }
+suspend inline fun Queue.databases() = suspendCoroutine<TAndMs<ServerDatabases>> { cont-> databases(cont) }
 
 fun Queue.databases(cont: Continuation<TAndMs<ServerDatabases>>) {
     queue({
-        with(getWriter(TagClient.Databases)) {
+        with(getWriter0(TagClient.Databases)) {
             toByteArray()
         }
     }, { it.databaseAndNames() }, null, cont)

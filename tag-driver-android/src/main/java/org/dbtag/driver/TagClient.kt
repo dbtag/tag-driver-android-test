@@ -13,12 +13,14 @@ typealias ResultCallback<T> = (Exception?, T?) -> Unit
 data class TAndMs<T>(val t: T, val ms: Long)
 
 interface Queue {
-    fun getWriter(command: Int): BinaryWriter
+    fun getWriter0(command: Int): BinaryWriter
     fun <T> queue(getBuffer: GetBuffer, cons: (BinaryReader) -> T, executor: Executor?,  cont: Continuation<TAndMs<T>>)
     }
 
+// Knows it user and has an access token
 interface UserQueue : Queue {
     val user: Tag
+    fun getWriter(command: Int): BinaryWriter
 }
 
 class ServerDatabaseUser(val server: String, val database: String, val user: String)
@@ -145,8 +147,9 @@ open class TagClient(server: String, port: Int = 3468, override val user: Tag, v
                 override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
             })
 
-    override fun getWriter(command: Int) = BinaryWriter().apply {
-        writeVarint(command.toLong())
+    override fun getWriter0(command: Int) = BinaryWriter().apply { writeVarint(command.toLong()) }
+
+    override fun getWriter(command: Int) = getWriter0(command).apply {
         writeString(token)
     }
 

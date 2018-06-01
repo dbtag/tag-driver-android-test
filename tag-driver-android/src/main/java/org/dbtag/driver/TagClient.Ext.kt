@@ -11,7 +11,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
  * by re-packaging timeSlotSummariesAsync
  * @param timeZone used to convert the implicit local time in startHour and endHour to the necessary UTC.
  */
-suspend fun Queue.busyDays(filter: Filter, startDay: Int, endDay: Int, timeZone: TimeZone) = suspendCoroutine<IntArray> { cont->
+suspend fun UserQueue.busyDays(filter: Filter, startDay: Int, endDay: Int, timeZone: TimeZone) = suspendCoroutine<IntArray> { cont->
     val timeSlots = LongArray(endDay - startDay)
     for (i in timeSlots.indices) {
         var time = (startDay + i) * 86400000L
@@ -58,10 +58,10 @@ suspend fun Queue.busyDays(filter: Filter, startDay: Int, endDay: Int, timeZone:
 ///**
 // * Saves all a message's attachments as files to the cacheDir and returns an array of URI's that points to those files.
 // */
-//suspend fun Queue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String) = suspendCoroutine<List<Uri>>
+//suspend fun UserQueue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String) = suspendCoroutine<List<Uri>>
 //  { cont-> saveAttachments(mid, attachmentCount, cacheDir, cont) }
 //
-//fun Queue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String, cont: Continuation<List<Uri>>) {
+//fun UserQueue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String, cont: Continuation<List<Uri>>) {
 //    object : Any() {
 //        private val uris = mutableListOf<Uri>()
 //        private var index = 0

@@ -7,10 +7,10 @@ import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
-suspend fun Queue.topicsReply(filter: Filter) = suspendCoroutine<TAndMs<TopicsReply<Tag>>>
+suspend fun UserQueue.topicsReply(filter: Filter) = suspendCoroutine<TAndMs<TopicsReply<Tag>>>
   { cont-> topicsReply(filter, 0L, Parts.None, { tag, _ -> tag } ,  cont) }
 
-suspend fun <T> Queue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
+suspend fun <T> UserQueue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
                                   cons: (Tag, MessageConstructArgs?) -> T) = suspendCoroutine<TAndMs<TopicsReply<T>>>
   { cont-> topicsReply(filter, ifUpdatedAfter, lastMessageParts, cons,  cont) }
 
@@ -18,7 +18,7 @@ suspend fun <T> Queue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMess
  * Gets all items.
  * @param ifUpdatedAfter  If this is non-zero, then nothing is returned unless newer dataPoints_ exist.
  */
-fun <T> Queue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
+fun <T> UserQueue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
                           cons: (Tag, MessageConstructArgs?) -> T, cont: Continuation<TAndMs<TopicsReply<T>>>) {
     queue({
         with(getWriter(TagClient.Topics)) {

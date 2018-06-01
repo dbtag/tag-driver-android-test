@@ -8,7 +8,7 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.suspendCoroutine
 
 // An exact match against a code - maybe matching in several topics...
-//suspend fun Queue.tagCodeResult(code: String) = suspendCoroutine<TagCodeResult> { cont->
+//suspend fun UserQueue.tagCodeResult(code: String) = suspendCoroutine<TagCodeResult> { cont->
 //    queue({
 //        with(getWriter(TagClient.TagCode)) {
 //            val CODE = 1

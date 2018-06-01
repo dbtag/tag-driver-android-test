@@ -10,10 +10,10 @@ import kotlin.coroutines.experimental.suspendCoroutine
  * Gets the bytes of an attachment to a message, by index starting from 0.
  * We don't cache these as they could be big.
  */
-suspend fun Queue.attachment(mid: Int, comment: Int, index: Int) = suspendCoroutine<TAndMs<Attachment>>
+suspend fun UserQueue.attachment(mid: Int, comment: Int, index: Int) = suspendCoroutine<TAndMs<Attachment>>
   { cont-> attachment(mid, comment, index, cont) }
 
-fun Queue.attachment(mid: Int, comment: Int, index: Int, cont: Continuation<TAndMs<Attachment>>) {
+fun UserQueue.attachment(mid: Int, comment: Int, index: Int, cont: Continuation<TAndMs<Attachment>>) {
     queue({
         with(getWriter(TagClient.Attachment)) {
             writeFieldVarint(1, mid.toLong())     // MID

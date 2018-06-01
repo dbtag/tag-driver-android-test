@@ -15,7 +15,7 @@ suspend fun Queue.signIn(user: String, database: String, password: String) = sus
 
 fun Queue.signIn(user: String, database: String, password: String, cont: Continuation<TAndMs<SignInResults>>) {
     queue({
-        with(getWriter(TagClient.SignIn)) {
+        with(getWriter0(TagClient.SignIn)) {
             writeField(1, user)  // USER
             writeField(2, database) // DATABASE
             writeField(3, password)  // PASSWORD

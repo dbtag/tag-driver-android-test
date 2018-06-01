@@ -15,10 +15,10 @@ import kotlin.coroutines.experimental.suspendCoroutine
  * Gets all distinct tags that ever have values, together with the value unit.
  * We could get the same tag more than once if values appear for it with more than one unit.
  */
-suspend fun Queue.tagsWithValues(filter: Filter) = suspendCoroutine<TAndMs<List<Tag>>>
+suspend fun UserQueue.tagsWithValues(filter: Filter) = suspendCoroutine<TAndMs<List<Tag>>>
 { cont-> tagsWithValues(filter, cont) }
 
-fun Queue.tagsWithValues(filter: Filter, cont: Continuation<TAndMs<List<Tag>>>)  {
+fun UserQueue.tagsWithValues(filter: Filter, cont: Continuation<TAndMs<List<Tag>>>)  {
     queue({
         with(getWriter(TagClient.TagsWithValues)) {
             if (filter !== Filter.empty) {

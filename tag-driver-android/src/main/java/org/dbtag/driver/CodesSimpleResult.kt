@@ -7,10 +7,10 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.codesSimpleResult(topic: String, limit: Int, code0: String = "") = suspendCoroutine<TAndMs<CodesSimpleResult>>
+suspend fun UserQueue.codesSimpleResult(topic: String, limit: Int, code0: String = "") = suspendCoroutine<TAndMs<CodesSimpleResult>>
   { cont-> codesSimpleResult(topic, limit, code0, cont) }
 
-fun Queue.codesSimpleResult(topic: String, limit: Int, code0: String = "", cont: Continuation<TAndMs<CodesSimpleResult>>) {
+fun UserQueue.codesSimpleResult(topic: String, limit: Int, code0: String = "", cont: Continuation<TAndMs<CodesSimpleResult>>) {
     queue({
         with(getWriter(TagClient.CodesSimple)) {
             writeField(1, topic) // TOPIC

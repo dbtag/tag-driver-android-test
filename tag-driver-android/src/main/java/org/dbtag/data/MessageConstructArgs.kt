@@ -183,7 +183,7 @@ class MessageConstructArgs {
 }
 
 
-fun Queue.message(mid: Int, parts: Int, cont: Continuation<TAndMs<MessageConstructArgs>>) {
+fun UserQueue.message(mid: Int, parts: Int, cont: Continuation<TAndMs<MessageConstructArgs>>) {
     queue({
         with(getWriter(TagClient.Message)) {
             val MID = 1

@@ -12,10 +12,10 @@ import kotlin.coroutines.experimental.suspendCoroutine
  * The [topics] are also kind of a toFilter, because all we are returning is how many matches per pair of tags
  * i.e. not worth keeping ...
  */
-suspend fun Queue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>) = suspendCoroutine<TAndMs<PairData>>
+suspend fun UserQueue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>) = suspendCoroutine<TAndMs<PairData>>
     { cont-> pairsCount(filter, ifUpdatedAfter, topics, cont) }
 
-fun Queue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>, cont: Continuation<TAndMs<PairData>>)  {
+fun UserQueue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>, cont: Continuation<TAndMs<PairData>>)  {
     queue({
         with(getWriter(TagClient.PairsCount)) {
             if (filter !== Filter.empty) {

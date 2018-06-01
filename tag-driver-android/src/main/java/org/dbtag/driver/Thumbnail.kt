@@ -6,11 +6,11 @@ import java.io.EOFException
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int) = suspendCoroutine<TAndMs<ByteArray>> { cont->
+suspend fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int) = suspendCoroutine<TAndMs<ByteArray>> { cont->
     thumbnail(mid, comment, index, maxSize, cont)
 }
 
-fun Queue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int, cont: Continuation<TAndMs<ByteArray>>) {
+fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int, cont: Continuation<TAndMs<ByteArray>>) {
     queue({
         with(getWriter(TagClient.Thumbnail)) {
             writeFieldVarint(1, mid.toLong())      // MID

@@ -131,15 +131,15 @@ class CoverAndProfileCache(val thumbnailCache: ThumbnailCache) {
 // tag = userTag
 
 // These don't use the CoverAndProfileCache, only the ThumbnailCache
-suspend fun Queue.profile(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
+suspend fun UserQueue.profile(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
     bitmap(tag, "p", maxSize, thumbnailCache, cont)
 }
 
-suspend fun Queue.cover(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
+suspend fun UserQueue.cover(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
     bitmap(tag, "c", maxSize, thumbnailCache, cont)
 }
 
-private fun Queue.bitmap(tag: String, sysCode: String, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<Bitmap?>) {
+private fun UserQueue.bitmap(tag: String, sysCode: String, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<Bitmap?>) {
     getLastMessageFirstThumbnail(Filter(listOf(Tag("sys.$sysCode"), Tag(tag))), maxSize, thumbnailCache,
         object : Continuation<ByteArray?> {
             override val context get() = EmptyCoroutineContext
