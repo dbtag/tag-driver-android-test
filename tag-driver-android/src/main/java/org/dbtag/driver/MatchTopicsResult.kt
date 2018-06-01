@@ -7,11 +7,11 @@ import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
-suspend fun Queue.matchSpeechAsync(texts: Iterable<String>) = suspendCoroutine<TAndMs<MatchTopicsResult>>
-  { cont-> matchSpeechAsync(texts, cont) }
+suspend fun Queue.matchSpeech(texts: Iterable<String>) = suspendCoroutine<TAndMs<MatchTopicsResult>>
+  { cont-> matchSpeech(texts, cont) }
 
 // match speech with several possible text's to go at, which are complete things to match
-fun Queue.matchSpeechAsync(texts: Iterable<String>, cont: Continuation<TAndMs<MatchTopicsResult>>) {
+fun Queue.matchSpeech(texts: Iterable<String>, cont: Continuation<TAndMs<MatchTopicsResult>>) {
     queue({
         with(getWriter(TagClient.MatchSpeech)) {
             for (text in texts)
@@ -21,11 +21,11 @@ fun Queue.matchSpeechAsync(texts: Iterable<String>, cont: Continuation<TAndMs<Ma
 }
 
 
-suspend fun Queue.leftMatchTagNameOrCodeAsync(filter: Filter, text: String, limit: Int) = suspendCoroutine<TAndMs<MatchTopicsResult>>
-  { cont-> leftMatchTagNameOrCodeAsync(filter, text, limit, cont) }
+suspend fun Queue.leftMatchTagNameOrCode(filter: Filter, text: String, limit: Int) = suspendCoroutine<TAndMs<MatchTopicsResult>>
+  { cont-> leftMatchTagNameOrCode(filter, text, limit, cont) }
 
 // Left match against partially typed text
-fun Queue.leftMatchTagNameOrCodeAsync(filter: Filter, text: String, limit: Int, cont: Continuation<TAndMs<MatchTopicsResult>>) {
+fun Queue.leftMatchTagNameOrCode(filter: Filter, text: String, limit: Int, cont: Continuation<TAndMs<MatchTopicsResult>>) {
     queue({
         with(getWriter(TagClient.LeftMatchTagNameOrCode)) {
             if (filter !== Filter.empty) {

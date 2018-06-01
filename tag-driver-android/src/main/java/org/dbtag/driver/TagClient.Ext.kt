@@ -11,7 +11,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
  * by re-packaging timeSlotSummariesAsync
  * @param timeZone used to convert the implicit local time in startHour and endHour to the necessary UTC.
  */
-suspend fun Queue.asyncBusyDays(filter: Filter, startDay: Int, endDay: Int, timeZone: TimeZone) = suspendCoroutine<IntArray> { cont->
+suspend fun Queue.busyDays(filter: Filter, startDay: Int, endDay: Int, timeZone: TimeZone) = suspendCoroutine<IntArray> { cont->
     val timeSlots = LongArray(endDay - startDay)
     for (i in timeSlots.indices) {
         var time = (startDay + i) * 86400000L
@@ -19,7 +19,7 @@ suspend fun Queue.asyncBusyDays(filter: Filter, startDay: Int, endDay: Int, time
         timeSlots[i] = time
     }
 
-//        db.timeSlotSummariesAsync(toFilter, 0, null, timeSlots, 0) { ex, result ->
+//        db.timeSlotSummaries(toFilter, 0, null, timeSlots, 0) { ex, result ->
 //            var result2: IntArray? = null
 //            if (result != null) {
 //                // We'll have a VariousSummary for each time-slot given above
@@ -35,11 +35,11 @@ suspend fun Queue.asyncBusyDays(filter: Filter, startDay: Int, endDay: Int, time
 //        }
 }
 
-//  public static void topicSummariesSortedAsync(@NonNull Parts db, @NonNull Filter toFilter, long ifUpdatedAfter,
+//  public static void topicSummariesSorted(@NonNull Parts db, @NonNull Filter toFilter, long ifUpdatedAfter,
 //                                               @Nullable String specificValueTag, int limitPerTopic,
 //                                               @NonNull final ResultCallback<TopicSummary[]> callback)
 //    {
-//    db.topicSummariesAsync(toFilter, ifUpdatedAfter, specificValueTag, limitPerTopic, new ResultCallback<TopicSummary[]>()
+//    db.topicSummaries(toFilter, ifUpdatedAfter, specificValueTag, limitPerTopic, new ResultCallback<TopicSummary[]>()
 //      {
 //      @Override
 //      public void onResult(@Nullable Exception ex, @Nullable TopicSummary[] result)
@@ -58,10 +58,10 @@ suspend fun Queue.asyncBusyDays(filter: Filter, startDay: Int, endDay: Int, time
 ///**
 // * Saves all a message's attachments as files to the cacheDir and returns an array of URI's that points to those files.
 // */
-//suspend fun Queue.saveAttachmentsAsync(mid: Int, attachmentCount: Int, cacheDir: String) = suspendCoroutine<List<Uri>>
-//  { cont-> saveAttachmentsAsync(mid, attachmentCount, cacheDir, cont) }
+//suspend fun Queue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String) = suspendCoroutine<List<Uri>>
+//  { cont-> saveAttachments(mid, attachmentCount, cacheDir, cont) }
 //
-//fun Queue.saveAttachmentsAsync(mid: Int, attachmentCount: Int, cacheDir: String, cont: Continuation<List<Uri>>) {
+//fun Queue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String, cont: Continuation<List<Uri>>) {
 //    object : Any() {
 //        private val uris = mutableListOf<Uri>()
 //        private var index = 0

@@ -9,13 +9,13 @@ import kotlin.coroutines.experimental.suspendCoroutine
 /**
  * Gets code1Summaries in time-slots, but does not bother breaking down into top 10 codes in topics.
  */
-suspend fun Queue.asyncTimeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
-                                               timeSlots: Iterable<Long>, wrapEvery: Long) = suspendCoroutine<TAndMs<TimeSlotSummariesResult>>
-  { cont-> asyncTimeSlotSummariesResult(filter, ifUpdatedAfter, specificValueTag, timeSlots, wrapEvery, cont) }
+suspend fun Queue.timeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
+                                          timeSlots: Iterable<Long>, wrapEvery: Long) = suspendCoroutine<TAndMs<TimeSlotSummariesResult>>
+  { cont-> timeSlotSummariesResult(filter, ifUpdatedAfter, specificValueTag, timeSlots, wrapEvery, cont) }
 
 
-fun Queue.asyncTimeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
-                                               timeSlots: Iterable<Long>, wrapEvery: Long, cont: Continuation<TAndMs<TimeSlotSummariesResult>>) {
+fun Queue.timeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
+                                  timeSlots: Iterable<Long>, wrapEvery: Long, cont: Continuation<TAndMs<TimeSlotSummariesResult>>) {
     queue({
         with(getWriter(TagClient.TimeSlotSummaries)) {
             if (filter !== Filter.empty) {

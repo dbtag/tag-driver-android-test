@@ -75,12 +75,12 @@ class Message(args: MessageConstructArgs) : MidiMessage(args) {
 
         const val parts = Parts.All
 
-        suspend fun asyncSelect(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
-                                desc: Boolean = false, executor: Executor? = null) = suspendCoroutine< TAndMs<MessagesData<Message>>> { cont->
-            asyncSelect0(queue, filter, limit, ifUpdatedAfter, desc, executor, cont)
+        suspend fun select(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
+                           desc: Boolean = false, executor: Executor? = null) = suspendCoroutine< TAndMs<MessagesData<Message>>> { cont->
+            select(queue, filter, limit, ifUpdatedAfter, desc, executor, cont)
         }
 
-        fun asyncSelect0(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
+        fun select(queue: Queue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
                          desc: Boolean = false, executor: Executor? = null, cont: Continuation<TAndMs<MessagesData<Message>>>) {
             queue.select(filter, 0, Filter.empty, limit, ifUpdatedAfter, desc, Parts.All, { args: MessageConstructArgs ->
                 Message(args)

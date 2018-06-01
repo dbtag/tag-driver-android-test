@@ -4,7 +4,7 @@ import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.asyncInsertCredentials(password: String, extraText: String) = suspendCoroutine<TAndMs<Int>> { cont->
+suspend fun Queue.insertCredentials(password: String, extraText: String) = suspendCoroutine<TAndMs<Int>> { cont->
     queue( {
         with(getWriter(TagClient.InsertCredentials)) {
             if (password.isNotEmpty())

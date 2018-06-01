@@ -513,7 +513,7 @@ open class TagClient(server: String, port: Int = 3468, override val user: Tag, v
         //   * For example, with 3 items we look up T1/T1, T1/T2, T1/T3, T2/T2, T2/T3, T3/T3
         //   * so note that we also look for the same topic occurring twice in a message
         //   */
-        //  public void pairsCountAsync(@Nullable Filter toFilter, long ifUpdatedAfter, @NonNull String[] items, final @NonNull ResultCallback<YLabel[]> callback)
+        //  public void pairsCount(@Nullable Filter toFilter, long ifUpdatedAfter, @NonNull String[] items, final @NonNull ResultCallback<YLabel[]> callback)
         //    {
         //    final int FILTER = 1, IF_UPDATED_AFTER = 2, TOPIC = 3;
         //
@@ -537,7 +537,7 @@ open class TagClient(server: String, port: Int = 3468, override val user: Tag, v
         //          ex = ex2;
         //          }
         //      if (DEBUG) if (ex != null)
-        //        Log.e(TAG, "pairsCountAsync", ex);
+        //        Log.e(TAG, "pairsCount", ex);
         //      callback(ex, ret);
         //      }});
         //    }

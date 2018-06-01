@@ -53,7 +53,7 @@ data class Count(val posts: Int, val tagged: Int, val latitudeMin: Double, val l
 data class CrossTab(val topic1: String, val topic2: String, val tagValue: String?,
                     val code1Summaries: List<Code1Summaries>, val code2Tags: List<Tag>)
 
-data class ServerDatabases(val host: String, val databases: List<String>)
+data class ServerDatabases(val databases: List<String>)
 
 data class Match(val tag: Tag)
 

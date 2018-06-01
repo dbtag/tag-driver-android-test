@@ -6,7 +6,6 @@ import org.dbtag.data.Filter
 import org.dbtag.data.MessageIdCommentIndexMaxSize
 import org.dbtag.data.Tag
 import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.EmptyCoroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -25,7 +24,7 @@ class ThumbnailCache(val db: UserQueue) {
      * Gets the bytes of a bitmap that visualises an attachment to a message, by index starting from 0
      */
     fun getThumbnail(mid: Int, comment: Int, index: Int, maxSize: Int, cont: Continuation<ByteArray?>) {
-        cache.asyncGet(MessageIdCommentIndexMaxSize(mid, comment, index, maxSize), cont)
+        cache.get(MessageIdCommentIndexMaxSize(mid, comment, index, maxSize), cont)
     }
 
 
@@ -36,7 +35,7 @@ class ThumbnailCache(val db: UserQueue) {
      * Gets a bitmap that visualises an attachment to a message, by index starting from 0
      */
     fun getBitmap(mid: Int, comment: Int, index: Int, maxSize: Int, cont: Continuation<Bitmap?>) {
-        cache.asyncGet(MessageIdCommentIndexMaxSize(mid, comment, index, maxSize),
+        cache.get(MessageIdCommentIndexMaxSize(mid, comment, index, maxSize),
             object : Continuation<ByteArray?> {
                 override val context get() = cont.context
                 override fun resumeWithException(exception: Throwable)  = cont.resumeWithException(exception)
@@ -63,27 +62,27 @@ class CoverAndProfileCache(val thumbnailCache: ThumbnailCache) {
     private data class TagTypeMaxSize(val tag: String, val type: Typo, val maxSize: Int)
 
     private val cache = CreateJustOnceCacheCallback<TagTypeMaxSize, Bitmap?> (
-            { (tag, type, maxSize), cont -> thumbnailCache.db.getBitmapAsync0(tag, if (type == Typo.Cover) "c" else "p", maxSize,
+            { (tag, type, maxSize), cont -> thumbnailCache.db.bitmap(tag, if (type == Typo.Cover) "c" else "p", maxSize,
                     thumbnailCache, cont) })
 
 
-    suspend fun asyncGet1(tag: String, type: Typo, maxSize: Int) = suspendCoroutine<Bitmap?> { cont-> asyncGet(tag, type, maxSize, cont) }
+    suspend fun get1(tag: String, type: Typo, maxSize: Int) = suspendCoroutine<Bitmap?> { cont-> get(tag, type, maxSize, cont) }
 
     /**
      * Gets a photo, trying our cache first.
      */
-    fun asyncGet(tag: String, type: Typo, maxSize: Int, cont: Continuation<Bitmap?>) = cache.asyncGet(TagTypeMaxSize(tag, type, maxSize), cont)
+    fun get(tag: String, type: Typo, maxSize: Int, cont: Continuation<Bitmap?>) = cache.get(TagTypeMaxSize(tag, type, maxSize), cont)
 
     fun getIfCached(tag: String, type: Typo, maxSize: Int) = cache.getIfCached(TagTypeMaxSize(tag, type, maxSize))
 
 //    /**
 //     * Convenient alternative that knows about special targets.
 //     */
-//    fun getAsync(tag: String, type: Typo, maxSize: Int, view: ImageView, defaultBitmap: Bitmap?) {
+//    fun get(tag: String, type: Typo, maxSize: Int, view: ImageView, defaultBitmap: Bitmap?) {
 //        // For now, get rid of anything that might be sitting there because it's probably wrong,
 //        // and we don't want it on show if the network stuff is slow
 //        view.setImageDrawable(null)
-//        asyncGet(tag, type, maxSize, { _, result ->
+//        get(tag, type, maxSize, { _, result ->
 //            result?:defaultBitmap?.let { view.setImageDrawableWithFadeIn(it) }
 //        })
 //    }
@@ -91,11 +90,11 @@ class CoverAndProfileCache(val thumbnailCache: ThumbnailCache) {
 //    /**
 //     * Convenient alternative that knows about special targets.
 //     */
-//    fun getAsync(tag: String, type: Typo, maxSize: Int, view: TextView, width: Int, height: Int) {
+//    fun get(tag: String, type: Typo, maxSize: Int, view: TextView, width: Int, height: Int) {
 //        // For now, get rid of anything that might be sitting there because it's probably wrong,
 //        // and we don't want it on show if the network stuff is slow
 //        view.setCompoundDrawables(null, null, null, null)
-//        getAsync(tag, type, maxSize, { _, result ->
+//        get(tag, type, maxSize, { _, result ->
 //            if (result != null) {
 //                val bitmapDrawable = BitmapDrawable(view.resources, result)
 //                val imgWidth = height.toFloat() * bitmapDrawable.intrinsicWidth / bitmapDrawable.intrinsicHeight
@@ -132,16 +131,16 @@ class CoverAndProfileCache(val thumbnailCache: ThumbnailCache) {
 // tag = userTag
 
 // These don't use the CoverAndProfileCache, only the ThumbnailCache
-suspend fun Queue.getProfile(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
-    getBitmapAsync0(tag, "p", maxSize, thumbnailCache, cont)
+suspend fun Queue.profile(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
+    bitmap(tag, "p", maxSize, thumbnailCache, cont)
 }
 
-suspend fun Queue.getCoverAsync(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
-    getBitmapAsync0(tag, "c", maxSize, thumbnailCache, cont)
+suspend fun Queue.cover(tag: String, maxSize: Int, thumbnailCache: ThumbnailCache) = suspendCoroutine<Bitmap?> { cont->
+    bitmap(tag, "c", maxSize, thumbnailCache, cont)
 }
 
-private fun Queue.getBitmapAsync0(tag: String, sysCode: String, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<Bitmap?>) {
-    getLastMessageFirstThumbnailAsync0(Filter(listOf(Tag("sys.$sysCode"), Tag(tag))), maxSize, thumbnailCache,
+private fun Queue.bitmap(tag: String, sysCode: String, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<Bitmap?>) {
+    getLastMessageFirstThumbnail(Filter(listOf(Tag("sys.$sysCode"), Tag(tag))), maxSize, thumbnailCache,
         object : Continuation<ByteArray?> {
             override val context get() = EmptyCoroutineContext
             override fun resume(value: ByteArray?) {

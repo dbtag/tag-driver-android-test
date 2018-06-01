@@ -6,9 +6,9 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.asyncDatabases() = suspendCoroutine<TAndMs<ServerDatabases>> { cont-> asyncDatabases0(cont) }
+suspend fun Queue.databases() = suspendCoroutine<TAndMs<ServerDatabases>> { cont-> databases(cont) }
 
-fun Queue.asyncDatabases0(cont: Continuation<TAndMs<ServerDatabases>>) {
+fun Queue.databases(cont: Continuation<TAndMs<ServerDatabases>>) {
     queue({
         with(getWriter(TagClient.Databases)) {
             toByteArray()
@@ -18,7 +18,7 @@ fun Queue.asyncDatabases0(cont: Continuation<TAndMs<ServerDatabases>>) {
 
 
 internal fun BinaryReader.databaseAndNames(): ServerDatabases {
-    var host = ""
+    // var host = ""
     val databases = mutableListOf<String>()
     val eor = bufferSize
     while (position != eor) {
@@ -31,12 +31,12 @@ internal fun BinaryReader.databaseAndNames(): ServerDatabases {
             WireType.LENGTH_DELIMITED -> {
                 val len = readVarint().toInt()
                 when (field) {
-                    1 -> host = readString(len) // HOST
+                    // 1 -> host = readString(len) // HOST   TODO: this is never returned by servers so remove it
                     2 -> databases.add(readString(len)) // DATABASE
                     else -> skip(len)
                 }
             }
         }
     }
-    return ServerDatabases(host, databases)
+    return ServerDatabases(databases)
 }

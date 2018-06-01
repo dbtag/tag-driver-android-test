@@ -5,8 +5,8 @@ import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 
-fun Queue.asyncMessagesCountAndTopicSummaries(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String = "",
-                                              limitPerTopic: Int, cont: Continuation<TAndMs<MessagesCountAndTopicSummaries>>) {
+fun Queue.messagesCountAndTopicSummaries(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String = "",
+                                         limitPerTopic: Int, cont: Continuation<TAndMs<MessagesCountAndTopicSummaries>>) {
     queue({
         with(getWriter(TagClient.TopicSummaries)) {
             if (filter !== Filter.empty) {

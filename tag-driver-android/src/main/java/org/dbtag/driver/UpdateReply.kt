@@ -7,7 +7,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
 
 // TODO: could send computer name, etc, in this as they will never subsequently change - assuming the
 // socket is recycled for further use...
-//suspend fun Queue.updateAsync(version: Int) = suspendCoroutine<UpdateReply> { cont->
+//suspend fun Queue.update(version: Int) = suspendCoroutine<UpdateReply> { cont->
 //    queue({
 //        with(getWriter(TagClient.Update)) {
 //            val VERSION = 1

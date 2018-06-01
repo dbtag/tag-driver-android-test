@@ -9,10 +9,10 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.asyncCount(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L) = suspendCoroutine<TAndMs<Count>>
-  { cont-> asyncCount(filter, ifUpdatedAfter, cont) }
+suspend fun Queue.count(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L) = suspendCoroutine<TAndMs<Count>>
+  { cont-> count(filter, ifUpdatedAfter, cont) }
 
-fun Queue.asyncCount(filter: Filter, ifUpdatedAfter: Long, cont: Continuation<TAndMs<Count>>)  {
+fun Queue.count(filter: Filter, ifUpdatedAfter: Long, cont: Continuation<TAndMs<Count>>)  {
     queue({
         with(getWriter(TagClient.Count)) {
             // val JOIN = 2  // TODO: not used right now !

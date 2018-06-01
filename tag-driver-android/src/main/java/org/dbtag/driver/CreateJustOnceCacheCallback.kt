@@ -22,7 +22,7 @@ class CreateJustOnceCacheCallback<TKey, TValue>(private val creator_: Creator<TK
     }
 
     // cont may be null if we just want to pre-load the cache a bit
-    fun asyncGet(key: TKey, cont: Continuation<TValue?>?, creator: Creator<TKey, TValue>? = null) {
+    fun get(key: TKey, cont: Continuation<TValue?>?, creator: Creator<TKey, TValue>? = null) {
         // There are 3 possibilities : no-one is working on it so we should start, someone is already working so we should wait,
         // or the answer is already known.
         var weAreCreating = false

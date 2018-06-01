@@ -6,15 +6,15 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun Queue.asyncCrossTab(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L, topic1: String,
-                                topic2: String, tagValue: String = "") = suspendCoroutine<TAndMs<CrossTab>>
-  { cont-> asyncCrossTab(filter, ifUpdatedAfter, topic1, topic2, tagValue, cont) }
+suspend fun Queue.crossTab(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L, topic1: String,
+                           topic2: String, tagValue: String = "") = suspendCoroutine<TAndMs<CrossTab>>
+  { cont-> crossTab(filter, ifUpdatedAfter, topic1, topic2, tagValue, cont) }
 
 /**
  * Gets a TopicSummary[] array
  */
-fun Queue.asyncCrossTab(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L, topic1: String,
-                                topic2: String, tagValue: String = "", cont: Continuation<TAndMs<CrossTab>>) {
+fun Queue.crossTab(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L, topic1: String,
+                   topic2: String, tagValue: String = "", cont: Continuation<TAndMs<CrossTab>>) {
     queue({
         with(getWriter(TagClient.CrossTab)) {
             if (filter !== Filter.empty) {

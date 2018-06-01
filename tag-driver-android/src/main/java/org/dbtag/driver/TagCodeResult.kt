@@ -8,17 +8,17 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.suspendCoroutine
 
 // An exact match against a code - maybe matching in several topics...
-//suspend fun Queue.asyncTagCodeResult(code: String) = suspendCoroutine<TagCodeResult> { cont->
+//suspend fun Queue.tagCodeResult(code: String) = suspendCoroutine<TagCodeResult> { cont->
 //    queue({
 //        with(getWriter(TagClient.TagCode)) {
 //            val CODE = 1
 //            writeField(CODE, code)
 //            toByteArray()
-//        }}, { it.TagCodeResult() }, null, cont)
+//        }}, { it.tagCodeResult() }, null, cont)
 //}
 
 
-private fun BinaryReader.TagCodeResult(): TagCodeResult {
+private fun BinaryReader.tagCodeResult(): TagCodeResult {
     val tagAndNames = mutableListOf<Tag>()
     val TAG = 1
     val eor = bufferSize

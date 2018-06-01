@@ -233,7 +233,7 @@ fun Queue.getTeams(cont: Continuation<List<Team>>) {
 //
 //                                // See what this team is following
 //                                if (!team0.deleted) {
-//                                    val x88 = asyncLastValue(Filter().require(team0.team.tag), 0, "sys.f", null, "team", false, 0, { tag, _, _ -> tag }).second
+//                                    val x88 = lastValue(Filter().require(team0.team.tag), 0, "sys.f", null, "team", false, 0, { tag, _, _ -> tag }).second
 //                                    val following = mutableListOf<YLabel>()
 //                                    val followingWithNotifications = mutableListOf<YLabel>()
 //                                    for (tnv in x88) if (tnv.hasValue) {

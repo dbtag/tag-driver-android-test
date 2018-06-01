@@ -8,9 +8,9 @@ enum class CodeSort(val v: Int) {
     Code(0), Name(1), Posts(2), Tagged(3), MRT(4), TopicDuration(5),
     TotalTagValue(6), FirstTopicName(7), Q2Duration(8) }
 
-suspend fun Queue.asyncCodes(filter: Filter, topic: String, joinTopic: String, limit: Int,
-                             sort: CodeSort, sortTopic: String, desc: Boolean,
-                             code0: String) = suspendCoroutine<TAndMs<CodesResult>> { cont->
+suspend fun Queue.codes(filter: Filter, topic: String, joinTopic: String, limit: Int,
+                        sort: CodeSort, sortTopic: String, desc: Boolean,
+                        code0: String) = suspendCoroutine<TAndMs<CodesResult>> { cont->
 
 //    Filter = 1
 //    Topic

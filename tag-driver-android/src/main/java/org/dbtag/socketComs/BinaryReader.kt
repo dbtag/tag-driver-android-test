@@ -30,43 +30,6 @@ class BinaryReader(buffer: ByteArray? = null, size: Int = 0) {
         this.position = position
     }
 
-    //  /**
-    //   * Decodes UTF-8 bytes to a String
-    //   */
-    //  private static String decode(final byte[] array, final int start, final int length)
-    //    {
-    //// This is as fast as we have managed at decoding UTF8 bytes
-    //// We use JNI instead for the best speed
-    //    char[] data = new char[length]; // at most this many chars if all ascii
-    //
-    //    int idx = start, last = start + length, charLength = 0;
-    //    while (idx < last)
-    //      {
-    //      byte b0 = array[idx++];
-    //      if ((b0 & 0x80) == 0)
-    //        data[charLength++] = (char) (b0 & 0xff);
-    //      else
-    //        {
-    //        int utfCount = 1;
-    //        if ((b0 & 0xf0) == 0xe0)
-    //          utfCount = 2;
-    //        else if ((b0 & 0xf8) == 0xf0)
-    //          utfCount = 3;
-    //        int val = b0 & (0x1f >> (utfCount - 1));
-    //        for (int i = 0; i < utfCount; ++i)
-    //          {
-    //          val <<= 6;
-    //          val |= array[idx++] & 0x3f;
-    //          }
-    //        // We are getting U+030A (Combining Ring Above) but the Android font
-    //        // only knows U+00B0 (Degree Sign)
-    //        if (val == '\u030A')
-    //          val = '\u00B0';
-    //        data[charLength++] = (char) val;
-    //        }
-    //      }
-    //    return new String(data, 0, charLength);
-    //    }
 
     fun unreadBytesCount() = _bufferSize - position
 
