@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
 
         val client = org.dbtag.driver.TagUnsignedInClient("logicart.flowbook.com")
         launch() {
-            client.count()
             val (databases, ms) = client.databases()
             Log.i("ms", ms.toString() + " " + databases)
         }
