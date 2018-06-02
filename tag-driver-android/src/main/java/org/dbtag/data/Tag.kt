@@ -57,7 +57,7 @@ open class Tag(val tag: String, val originalName: String = "", val value: Double
     fun asTag(): String {
         var ret: String
         if (topic == "user")
-            ret = "@" + code
+            ret = "@$code"
         else {
             ret = "#"
             if (topic == "sys")

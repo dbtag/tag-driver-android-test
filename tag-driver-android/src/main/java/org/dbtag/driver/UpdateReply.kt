@@ -3,7 +3,6 @@ package org.dbtag.driver
 import org.dbtag.data.UpdateReply
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.suspendCoroutine
 
 // TODO: could send computer name, etc, in this as they will never subsequently change - assuming the
 // socket is recycled for further use...
@@ -16,7 +15,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
 //        }}, { it.UpdateReply() }, null, cont)
 //}
 
-private fun BinaryReader.UpdateReply() : UpdateReply {
+private fun BinaryReader.updateReply() : UpdateReply {
     var apkVersionCode = 0
     var apkBytes: ByteArray? = null
     val APK_VERSION_CODE = 1

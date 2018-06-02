@@ -1,4 +1,4 @@
-package dbtag.socketComs;
+package org.dbtag.socketComs;
 
 class LZ4
   {

@@ -4,8 +4,6 @@ import org.dbtag.data.Attachment
 import org.dbtag.data.Tag
 import java.io.File
 import java.io.FileInputStream
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 // sys topic extension methods
 
@@ -49,7 +47,7 @@ suspend fun UserQueue.setUnColleague(user: String, fromUser: String = "") =
 private suspend fun UserQueue.setColleagueHelper(fromUser: String, user: String, value: Int) {
     var content = "#sys.colleague"
     if (value == 0) content += "=0"
-    content += " #user." + user
+    content += " #user.$user"
     colleagueFollowHelper(content, fromUser)
 }
 

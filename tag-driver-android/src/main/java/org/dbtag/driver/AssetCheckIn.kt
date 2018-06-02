@@ -12,7 +12,7 @@ class AssetCheckIn(private val asset: String, private val context: Context, priv
     private val ver = context.packageManager.getPackageInfo(context.packageName, 0).versionName
 
     fun asMessage(location: Location?, lastPing: Long): String {
-        var text = "#sys.asset." + asset
+        var text = "#sys.asset.$asset"
         val wifiInfo = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo
         var ssid = wifiInfo.ssid
         ssid = if (ssid == null) "" else ssid.replace("\"", "")

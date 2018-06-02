@@ -6,8 +6,6 @@ import org.dbtag.data.QVals
 import org.dbtag.data.write
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 suspend fun UserQueue.count(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L) = queue({
     with(getWriter(TagClient.Count)) {

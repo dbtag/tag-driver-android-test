@@ -1,13 +1,8 @@
 package org.dbtag.driver
 
 import org.dbtag.data.Filter
-import org.dbtag.data.MessagesData
 import org.dbtag.data.Tag
 import org.dbtag.data.parseTagsOnly
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.CoroutineContext
-import kotlin.coroutines.experimental.EmptyCoroutineContext
-import kotlin.coroutines.experimental.suspendCoroutine
 
 data class U2(val tag: Tag)
 
@@ -53,7 +48,7 @@ suspend fun UserQueue.getTeams() : List<Team> {
                     }
                     tag.topic == "user" -> {
                         val userCode = tag.code
-                        val u2 = usersCache[userCode] ?: U2(Tag(tag.tag, tag.name)).apply { usersCache.put(userCode, this) }
+                        val u2 = usersCache[userCode] ?: U2(Tag(tag.tag, tag.name)).apply { usersCache[userCode] = this }
                         if (seenManager) {
                             if (tag.value == 0.0)
                                 managers.remove(u2)

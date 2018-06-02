@@ -1,7 +1,7 @@
 package org.dbtag.socketComs
 
 import org.dbtag.data.toLowerCaseInvariant
-import java.util.HashMap
+import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -15,7 +15,7 @@ class SharedClients(val executor: Executor) {
             var ret: SendReceiveQueue? = cache[key]
             if (ret == null) {
                 ret = SendReceiveQueue(server, port, executor, false)
-                cache.put(key, ret)
+                cache[key] = ret
             }
             return ret
         }

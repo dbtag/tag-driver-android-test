@@ -28,7 +28,7 @@ fun BinaryReader.tagNameDateContentAttachments(len: Int): TagNameDateContentAtta
                 when (field) {
                     MessageConstructArgs.MESSAGE_ATTACHMENT -> {
                         if (attachments == null)
-                            attachments = mutableListOf<NameAndSize>()
+                            attachments = mutableListOf()
                         attachments.add(nameAndSize(len2))
                     }
                     MessageConstructArgs.MESSAGE_CONTENT -> content = readString(len2)

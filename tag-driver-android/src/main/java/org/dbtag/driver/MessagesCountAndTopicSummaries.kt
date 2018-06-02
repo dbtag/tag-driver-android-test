@@ -3,7 +3,6 @@ package org.dbtag.driver
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
 
 suspend fun UserQueue.messagesCountAndTopicSummaries(filter: Filter, ifUpdatedAfter: Long,
                                                      specificValueTag: String = "", limitPerTopic: Int) = queue({

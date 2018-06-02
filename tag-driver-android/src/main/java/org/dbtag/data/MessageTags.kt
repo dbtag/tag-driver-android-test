@@ -1,7 +1,5 @@
 package org.dbtag.data
 
-import org.dbtag.driver.Parts
-
 //open class MessageTags(args: MessageConstructArgs) {
 //    val tags = args.tags
 //

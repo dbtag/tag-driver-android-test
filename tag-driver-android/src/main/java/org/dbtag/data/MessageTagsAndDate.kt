@@ -1,7 +1,5 @@
 package org.dbtag.data
 
-import org.dbtag.driver.Parts
-
 //class MessageTagsAndDate(args: MessageConstructArgs) : MessageTags(args) {
 //    val messageDate: Long = args.messageDate
 //

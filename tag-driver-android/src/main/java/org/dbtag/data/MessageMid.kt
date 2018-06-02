@@ -1,8 +1,9 @@
 package org.dbtag.data
 
-import org.dbtag.driver.*
+import org.dbtag.driver.Parts
+import org.dbtag.driver.UserQueue
+import org.dbtag.driver.select
 import java.util.concurrent.Executor
-import kotlin.coroutines.experimental.Continuation
 
 class MessageMid(args: MessageConstructArgs) {
     val mid: Int = args.mid

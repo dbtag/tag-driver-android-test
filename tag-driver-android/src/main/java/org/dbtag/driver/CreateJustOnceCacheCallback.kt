@@ -40,6 +40,7 @@ class CreateJustOnceCacheCallback<TKey, TValue>(private val creator_: Creator<TK
                 override val context = EmptyCoroutineContext
                 override fun resume(value: TValue) = x.set(null, value)
                 override fun resumeWithException(exception: Throwable) {
+                    @Suppress("ReplaceGetOrSet")
                     x.set(exception as Exception,  null)
                     // An exception was signalled during the create
                     synchronized(cache) {

@@ -1,7 +1,5 @@
 package org.dbtag.data
 
-import org.dbtag.driver.Parts
-
 //// A constructed message that just holds the tags that are not in the filter
 //open class MessageTagsNotInFilter(args: MessageConstructArgs) {
 //    val tagsNotInFilter = args.tagsNotInFilter

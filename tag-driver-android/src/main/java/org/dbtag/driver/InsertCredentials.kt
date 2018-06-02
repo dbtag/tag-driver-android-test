@@ -2,7 +2,6 @@ package org.dbtag.driver
 
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.suspendCoroutine
 
 suspend fun UserQueue.insertCredentials(password: String, extraText: String) = queue( {
     with(getWriter(TagClient.InsertCredentials)) {

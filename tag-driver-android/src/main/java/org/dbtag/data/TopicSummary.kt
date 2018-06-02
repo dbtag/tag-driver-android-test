@@ -60,7 +60,7 @@ fun BinaryReader.topicSummary(len: Int) : TopicSummary {
         when (key and 7) {
             WireType.VARINT -> {
                 val value = readVarint()
-                if (field.toInt() == 1)  // TOTAL_COUNT
+                if (field == 1)  // TOTAL_COUNT
                     totalCount = value.toInt()
             }
             WireType.FIXED64 -> skip(8)

@@ -2,7 +2,6 @@ package org.dbtag.socketComs
 
 import org.dbtag.protobuf.WireType
 
-import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
 /**
@@ -109,7 +108,7 @@ class BinaryWriter(capacity: Int = 100, private val origin: Int = 0) {
     }
 
     inner class StoreEmbedded(private val field_: Int) {
-        private val ofs0_: Int = written
+        private val ofs0: Int = written
 
         init {
             ensureRoom(6)
@@ -117,9 +116,9 @@ class BinaryWriter(capacity: Int = 100, private val origin: Int = 0) {
         }
 
         fun close() {
-            val r = ofs0_ + 6
+            val r = ofs0 + 6
             val len = written - r
-            written = ofs0_
+            written = ofs0
             writeVarint((field_ shl 3 or WireType.LENGTH_DELIMITED).toLong())
             writeVarint(len.toLong())
             System.arraycopy(buffer, r, buffer, written, len)

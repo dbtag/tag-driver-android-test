@@ -103,11 +103,11 @@ private fun String.parse(startIndex: Int, endIndex: Int, isAt: Boolean, topicBec
     // not a zero length tag
         // Look for optional brackets containing a name
         var originalTag = substring(start0, index)
-        var name: String = ""
+        var name = ""
         if (isAt)
-          originalTag = "user." + originalTag
+          originalTag = "user.$originalTag"
         else if (topicBecomesSys && originalTag.indexOf('.') == -1)
-            originalTag = "sys." + originalTag //  if no topic, then assume sys. - TODO: or data.
+            originalTag = "sys.$originalTag" //  if no topic, then assume sys. - TODO: or data.
         if (bracket) {
             var bracketCount = 1
             var f3 = ++index
@@ -127,7 +127,7 @@ private fun String.parse(startIndex: Int, endIndex: Int, isAt: Boolean, topicBec
         // Look for an optional value   =([+\-]*[0-9,\.]+[a-zA-Z]*
         // TODO: this would be best   =[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?
         var value = Double.NaN
-        var unit: String = ""
+        var unit = ""
         if (index < endIndex && get(index) == '=') {
             var f3 = ++index
             while (f3 < endIndex) {

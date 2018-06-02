@@ -1,7 +1,5 @@
 package org.dbtag.data
 
-import org.dbtag.driver.Parts
-
 //class MessageTagsNotInFilterAndDate(args: MessageConstructArgs) : MessageTagsNotInFilter(args) {
 //    val messageDate: Long = args.messageDate
 //

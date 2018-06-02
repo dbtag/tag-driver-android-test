@@ -4,8 +4,6 @@ import org.dbtag.data.Attachment
 import org.dbtag.data.Tag
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 class MessageBuilder {
     var id = ""
@@ -55,9 +53,9 @@ class MessageBuilder {
             }
             val isReference = references.isNotEmpty()
             if (isReference)
-                add("#ref=" + references)
+                add("#ref=$references")
             else if (id.isNotEmpty())
-                add("#id=" + id)
+                add("#id=$id")
 
 //                    If Importance <> Importance.Low Then
 //                    .Add("#i=" & CType(Importance, Integer).ToString(InvariantCulture))

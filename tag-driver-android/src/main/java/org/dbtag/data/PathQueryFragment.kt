@@ -11,9 +11,9 @@ fun Filter.toQueryString(title: String = "") = mutableListOf<String>().apply {
     if (title.isNotEmpty())
         add("title=$title")
     if (requiredTags.isNotEmpty())
-        add("require=" + requiredTags.map { it.tag }.joinToString(","))
+        add("require=" + requiredTags.joinToString(",") { it.tag })
     if (excludedTags.isNotEmpty())
-        add("exclude=" + excludedTags.map { it.tag }.joinToString(","))
+        add("exclude=" + excludedTags.joinToString(",") { it.tag })
 //    if (startTime != 0L)
 //        add("starttime=" + "") //  startTime.ToString ("yyyy-MM-ddTHH:mm:ss.fffZ", InvariantCulture))
 //    if (endTime != 0L)
@@ -35,7 +35,7 @@ class PathQueryFragment(val filter: Filter, val msgId: String?) {
     override fun toString(): String {
         var t = filter.toQueryString()
         if (msgId != null)
-            t += "#" + msgId
+            t += "#$msgId"
         return t
     }
 

@@ -3,8 +3,6 @@ package org.dbtag.driver
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import java.io.EOFException
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 suspend fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int) = queue({
     with(getWriter(TagClient.Thumbnail)) {

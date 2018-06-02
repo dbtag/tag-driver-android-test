@@ -4,7 +4,6 @@ import org.dbtag.data.Tag
 import org.dbtag.socketComs.*
 import java.util.concurrent.Executor
 import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.EmptyCoroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -170,7 +169,7 @@ open class TagClient(server: String, port: Int = 3468, override val user: Tag, v
 
 //    val photo: CoverAndProfileCache = CoverAndProfileCache(this)
 
-    override fun toString() = socket.toString() + "  " + user.toString() + " " + token.toString()
+    override fun toString() = socket.toString() + "  " + user + " " + token
 //    override val userTag get() = "user." + user
 
 

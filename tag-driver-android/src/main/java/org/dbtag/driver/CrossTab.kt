@@ -3,8 +3,6 @@ package org.dbtag.driver
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 /**
  * Gets a TopicSummary[] array
@@ -49,7 +47,7 @@ private fun BinaryReader.crossTab(topic1: String, topic2: String, tagValue: Stri
                             while (position != eor2) {
                                 val code = readString()
                                 val name = readString()
-                                val tag = topic2 + "." + code
+                                val tag = "$topic2.$code"
                                 code2Tags.add(Tag(tag, name))
                             }
                         }
@@ -84,7 +82,7 @@ private fun BinaryReader.crossTab(topic1: String, topic2: String, tagValue: Stri
                                 }
                             }
                         }
-                        val tag = topic1 + "." + code1Code
+                        val tag = "$topic1.$code1Code"
                         code1Summaries.add(Code1Summaries(Tag(tag, code1Name), summaries))
                     }
                     else -> skip(len)

@@ -6,9 +6,7 @@ import org.dbtag.data.Filter
 import org.dbtag.data.MessageIdCommentIndexMaxSize
 import org.dbtag.data.Tag
 import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.EmptyCoroutineContext
 import kotlin.coroutines.experimental.startCoroutine
-import kotlin.coroutines.experimental.suspendCoroutine
 
 class ThumbnailCache(val db: UserQueue) {
     private val cache = CreateJustOnceCacheCallback({

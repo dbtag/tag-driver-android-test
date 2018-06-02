@@ -1,6 +1,5 @@
 package org.dbtag.driver
 
-import android.os.SystemClock
 import org.dbtag.data.Filter
 import org.dbtag.data.MessageConstructArgs
 import org.dbtag.data.MessagesData
@@ -9,8 +8,6 @@ import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import org.dbtag.socketComs.GetBuffer
 import java.util.concurrent.Executor
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 
 object Parts {

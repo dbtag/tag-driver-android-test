@@ -1,11 +1,10 @@
 package org.dbtag.driver
 
-import org.dbtag.data.tag
 import org.dbtag.data.Tag
 import org.dbtag.data.TagCodeResult
+import org.dbtag.data.tag
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.suspendCoroutine
 
 // An exact match against a code - maybe matching in several topics...
 //suspend fun UserQueue.tagCodeResult(code: String) = suspendCoroutine<TagCodeResult> { cont->
