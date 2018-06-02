@@ -3,43 +3,34 @@ package org.dbtag.driver
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 /**
  * Gets code1Summaries in time-slots, but does not bother breaking down into top 10 codes in topics.
  */
 suspend fun UserQueue.timeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
-                                          timeSlots: Iterable<Long>, wrapEvery: Long) = suspendCoroutine<TAndMs<TimeSlotSummariesResult>>
-  { cont-> timeSlotSummariesResult(filter, ifUpdatedAfter, specificValueTag, timeSlots, wrapEvery, cont) }
+                                  timeSlots: Iterable<Long>, wrapEvery: Long) = queue({
+    with(getWriter(TagClient.TimeSlotSummaries)) {
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(2, ifUpdatedAfter) // IF_UPDATED_AFTER
+        if (!specificValueTag.isEmpty())
+            writeField(3, specificValueTag) // SPECIFIC_VALUE_TAG
 
-
-fun UserQueue.timeSlotSummariesResult(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String,
-                                  timeSlots: Iterable<Long>, wrapEvery: Long, cont: Continuation<TAndMs<TimeSlotSummariesResult>>) {
-    queue({
-        with(getWriter(TagClient.TimeSlotSummaries)) {
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(2, ifUpdatedAfter) // IF_UPDATED_AFTER
-            if (!specificValueTag.isEmpty())
-                writeField(3, specificValueTag) // SPECIFIC_VALUE_TAG
-
-            val embTimeSlot = embeddedField(4) // TIME_SLOT
-            var slot = 0L
-            for (s in timeSlots) {
-                writeVarint(s - slot) // write differences, so timeSlots[] must be increasing
-                slot = s
-            }
-            embTimeSlot.close()
-            if (wrapEvery != 0L)
-                writeFieldVarint(5, wrapEvery) // WRAP_EVERY
-            toByteArray()
-        }}, { it.timeSlotSummariesResult() }, null, cont)
-}
+        val embTimeSlot = embeddedField(4) // TIME_SLOT
+        var slot = 0L
+        for (s in timeSlots) {
+            writeVarint(s - slot) // write differences, so timeSlots[] must be increasing
+            slot = s
+        }
+        embTimeSlot.close()
+        if (wrapEvery != 0L)
+            writeFieldVarint(5, wrapEvery) // WRAP_EVERY
+        toByteArray()
+    }}, { it.timeSlotSummariesResult() })
 
 
 //private fun BinaryReader.timeSlotSummariesResult(): TimeSlotSummariesResult {

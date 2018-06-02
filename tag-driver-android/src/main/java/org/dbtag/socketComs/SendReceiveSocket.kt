@@ -1,7 +1,6 @@
 package org.dbtag.socketComs
 
 import android.content.Context
-import android.util.Log
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress

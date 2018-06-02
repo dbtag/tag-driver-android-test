@@ -1,11 +1,9 @@
 package org.dbtag.data
 
 import org.dbtag.driver.*
-import org.dbtag.driver.Queue
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import java.util.*
-import kotlin.coroutines.experimental.Continuation
 
 // Carries information that will be used to construct some kind of message
 class MessageConstructArgs {
@@ -183,18 +181,16 @@ class MessageConstructArgs {
 }
 
 
-fun UserQueue.message(mid: Int, parts: Int, cont: Continuation<TAndMs<MessageConstructArgs>>) {
-    queue({
-        with(getWriter(TagClient.Message)) {
-            val MID = 1
-            val PARTS = 2
-            writeFieldVarint(MID, mid.toLong())
-            writeFieldVarint(PARTS, parts.toLong())
-            toByteArray()
-        }}, {
-        reader:BinaryReader -> MessageConstructArgs().apply {
-        with(reader) {
-            read(unreadBytesCount())
-        }
-    }}, null, cont)
-}
+suspend fun UserQueue.message(mid: Int, parts: Int) = queue({
+    with(getWriter(TagClient.Message)) {
+        val MID = 1
+        val PARTS = 2
+        writeFieldVarint(MID, mid.toLong())
+        writeFieldVarint(PARTS, parts.toLong())
+        toByteArray()
+    }}, {
+    reader:BinaryReader -> MessageConstructArgs().apply {
+    with(reader) {
+        read(unreadBytesCount())
+    }
+}})

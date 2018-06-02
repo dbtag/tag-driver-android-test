@@ -9,23 +9,19 @@ import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun UserQueue.count(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L) = suspendCoroutine<TAndMs<Count>>
-  { cont-> count(filter, ifUpdatedAfter, cont) }
+suspend fun UserQueue.count(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L) = queue({
+    with(getWriter(TagClient.Count)) {
+        // val JOIN = 2  // TODO: not used right now !
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(3, ifUpdatedAfter)  // IF_UPDATED_AFTER
+        toByteArray()
+    }}, { it.count(it.unreadBytesCount()) })
 
-fun UserQueue.count(filter: Filter, ifUpdatedAfter: Long, cont: Continuation<TAndMs<Count>>)  {
-    queue({
-        with(getWriter(TagClient.Count)) {
-            // val JOIN = 2  // TODO: not used right now !
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(3, ifUpdatedAfter)  // IF_UPDATED_AFTER
-            toByteArray()
-        }}, { it.count(it.unreadBytesCount()) }, null, cont)
-}
 
 internal fun BinaryReader.count(len: Int) : Count {
     var posts = 0

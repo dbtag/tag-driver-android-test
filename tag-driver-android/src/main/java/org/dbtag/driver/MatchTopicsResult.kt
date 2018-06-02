@@ -3,45 +3,37 @@ package org.dbtag.driver
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 
-suspend fun UserQueue.matchSpeech(texts: Iterable<String>) = suspendCoroutine<TAndMs<MatchTopicsResult>>
-  { cont-> matchSpeech(texts, cont) }
-
-// match speech with several possible text's to go at, which are complete things to match
-fun UserQueue.matchSpeech(texts: Iterable<String>, cont: Continuation<TAndMs<MatchTopicsResult>>) {
-    queue({
-        with(getWriter(TagClient.MatchSpeech)) {
-            for (text in texts)
-                writeField(1, text) // TEXT
-            toByteArray()
-        }}, { it.matchTopicsResult() }, null, cont)
-}
+/**
+ * Matches speech with several possible text's to go at, which are complete things to match
+ */
+suspend fun UserQueue.matchSpeech(texts: Iterable<String>) = queue({
+    with(getWriter(TagClient.MatchSpeech)) {
+        for (text in texts)
+            writeField(1, text) // TEXT
+        toByteArray()
+    }}, { it.matchTopicsResult() })
 
 
-suspend fun UserQueue.leftMatchTagNameOrCode(filter: Filter, text: String, limit: Int) = suspendCoroutine<TAndMs<MatchTopicsResult>>
-  { cont-> leftMatchTagNameOrCode(filter, text, limit, cont) }
-
-// Left match against partially typed text
-fun UserQueue.leftMatchTagNameOrCode(filter: Filter, text: String, limit: Int, cont: Continuation<TAndMs<MatchTopicsResult>>) {
-    queue({
-        with(getWriter(TagClient.LeftMatchTagNameOrCode)) {
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            writeField(3, text) // TEXT
-            if (limit != 0)
-                writeFieldVarint(4, limit.toLong()) // LIMIT
-            toByteArray()
-        }}, { it.matchTopicsResult() }, null, cont)
-}
+/**
+ * Left matches against partially typed text
+ */
+suspend fun UserQueue.leftMatchTagNameOrCode(filter: Filter, text: String, limit: Int) = queue({
+    with(getWriter(TagClient.LeftMatchTagNameOrCode)) {
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        writeField(3, text) // TEXT
+        if (limit != 0)
+            writeFieldVarint(4, limit.toLong()) // LIMIT
+        toByteArray()
+    }}, { it.matchTopicsResult() })
 
 
-fun BinaryReader.matchTopicsResult() : MatchTopicsResult {
+private fun BinaryReader.matchTopicsResult() : MatchTopicsResult {
     var exactSingleMatch = false
     val matchTopics = mutableListOf<MatchTopic>()
     val topicDirects = mutableListOf<Tag>()

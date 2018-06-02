@@ -7,6 +7,7 @@ import org.dbtag.data.MessagesData
 import org.dbtag.data.write
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
+import org.dbtag.socketComs.GetBuffer
 import java.util.concurrent.Executor
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -31,14 +32,8 @@ object Parts {
 }
 
 suspend fun <T>UserQueue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
-                            desc: Boolean, parts: Int, cons: (MessageConstructArgs) -> T, executor: Executor?=null) = suspendCoroutine<TAndMs<MessagesData<T>>> { cont->
-    select({getSelectWriteBytes(filter, limit, ifUpdatedAfter, desc, parts)}, cons, executor, cont)
-}
-
-fun <T>UserQueue.select(filter: Filter, joins: Any, subFilter: Filter, limit: Int, ifUpdatedAfter: Long,
-                    desc: Boolean, parts: Int, cons: (MessageConstructArgs) -> T, executor: Executor?, cont: Continuation<TAndMs<MessagesData<T>>>) {
-    select({getSelectWriteBytes(filter, limit, ifUpdatedAfter, desc, parts)}, cons, executor, cont)
-}
+                                desc: Boolean, parts: Int, cons: (MessageConstructArgs) -> T, executor: Executor? = null) =
+    select({getSelectWriteBytes(filter, limit, ifUpdatedAfter, desc, parts)}, cons, executor)
 
 
 internal fun UserQueue.getSelectWriteBytes(filter: Filter, limit: Int, ifUpdatedAfter: Long,
@@ -67,18 +62,9 @@ internal fun UserQueue.getSelectWriteBytes(filter: Filter, limit: Int, ifUpdated
 //private suspend fun UserQueue.select(byteArray: ByteArray, toFilter: Filter, cons: (MessageConstructArgs) -> Any)
 //        = suspendCoroutine<messagesData> { cont-> select(byteArray, toFilter, cons, cont) }
 
-internal fun <T>UserQueue.select(byteArray: () -> ByteArray, cons: (MessageConstructArgs) -> T, executor: Executor?, cont: Continuation<TAndMs<MessagesData<T>>>) {
-    var elapsedTime: Long = 0
-    queue({
-        // Take a note of the time now our coms is about to happen
-        elapsedTime = SystemClock.elapsedRealtime()
-        byteArray()
-    }, {
-        // TODO: Note the duration of the coms in the underlying Parts
-        val ping = SystemClock.elapsedRealtime() - elapsedTime
-        it.messagesData(cons)
-    }, executor, cont)
-}
+suspend fun <T>UserQueue.select(getBuffer: GetBuffer, cons: (MessageConstructArgs) -> T, executor: Executor? = null) =
+        queue(getBuffer, { it.messagesData(cons) }, executor)
+
 
 internal fun <T>BinaryReader.messagesData(cons: (MessageConstructArgs) -> T) : MessagesData<T> {
     var serverFreshness: Long = 0

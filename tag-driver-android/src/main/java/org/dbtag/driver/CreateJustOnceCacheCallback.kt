@@ -2,6 +2,7 @@ package org.dbtag.driver
 
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.EmptyCoroutineContext
+import kotlin.coroutines.experimental.suspendCoroutine
 
 typealias Creator<TKey, TValue> = (TKey, Continuation<TValue>) -> Unit
 
@@ -21,27 +22,25 @@ class CreateJustOnceCacheCallback<TKey, TValue>(private val creator_: Creator<TK
         }
     }
 
-    // cont may be null if we just want to pre-load the cache a bit
-    fun get(key: TKey, cont: Continuation<TValue?>?, creator: Creator<TKey, TValue>? = null) {
+    suspend fun get(key: TKey, creator: Creator<TKey, TValue>? = null) : TValue? = suspendCoroutine { cont ->
         // There are 3 possibilities : no-one is working on it so we should start, someone is already working so we should wait,
         // or the answer is already known.
         var weAreCreating = false
         val x = synchronized(cache) {
             cache[key].let {
                 it?: ValueWithPendingContinuations<TValue>().apply {
-                    cache.put(key, this)
+                    cache[key] = this
                     weAreCreating = true
                 }
             }
         }
-        if (cont != null)
-            x.addContinuation(cont)  // will call the callback right away if the value is already available ?????
+        x.addContinuation(cont)  // will call the callback right away if the value is already available ?????
         if (weAreCreating) {
             creator?:creator_(key, object : Continuation<TValue> {
                 override val context = EmptyCoroutineContext
                 override fun resume(value: TValue) = x.set(null, value)
                 override fun resumeWithException(exception: Throwable) {
-                    x[exception as Exception] = null
+                    x.set(exception as Exception,  null)
                     // An exception was signalled during the create
                     synchronized(cache) {
                         cache.remove(key)  // so this will need fetching fresh next time

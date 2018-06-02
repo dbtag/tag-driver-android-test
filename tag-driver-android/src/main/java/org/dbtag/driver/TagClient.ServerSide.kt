@@ -2,9 +2,6 @@ package org.dbtag.driver
 
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.EmptyCoroutineContext
-import kotlin.coroutines.experimental.suspendCoroutine
 
 
 //suspend fun UserQueue.getLastMessageFirstThumbnail(toFilter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache)
@@ -14,19 +11,13 @@ import kotlin.coroutines.experimental.suspendCoroutine
 
 // TODO: It would be nicer to do this in just one coms action using a new feature of select that returns attachment bytes in place
 // and also shrinks any bitmaps to the maxsize...
-fun UserQueue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache, cont: Continuation<ByteArray?>) {
+suspend fun UserQueue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbnailCache: ThumbnailCache) : ByteArray? {
     // Get the mid of the most recent message tagging these required tags and then look up that message's item1 attachment bitmap, if any
-    MessageMid.select(this, filter, 1, desc = true, cont = object: Continuation<TAndMs<MessagesData<MessageMid>>>{
-        override val context get() = EmptyCoroutineContext
-        override fun resume(value: TAndMs<MessagesData<MessageMid>>) {
-            val messages = value.t.messages
-            if (messages.size == 1)
-                thumbnailCache.getThumbnail(messages[0].mid, 0, 0, maxSize, cont)
-            else
-                cont.resume(null)
-        }
-        override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
-    })
+    val messages = MessageMid.select(this, filter, 1, desc = true).messages
+    return if (messages.size == 1)
+        thumbnailCache.getThumbnail(messages[0].mid, 0, 0, maxSize)
+    else
+        null
 }
 
 
@@ -46,98 +37,91 @@ fun UserQueue.getLastMessageFirstThumbnail(filter: Filter, maxSize: Int, thumbna
 //}
 
 
-suspend fun <T> UserQueue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
-                                includeZeroValue: Boolean, lastMessageParts: Int, cons: (Tag, Long, MessageConstructArgs?) -> T) = suspendCoroutine<TAndMs<Pair<Long, List<T>>>> { cont ->
-    lastValue(filter, ifUpdatedAfter, valueTag, excludeTag, excludeTopic, includeZeroValue, lastMessageParts, cons, cont)
-}
 
 // TODO: what about "joins() As Join"  ?
-fun <T> UserQueue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
-                              includeZeroValue: Boolean, lastMessageParts: Int, cons: (Tag, Long, MessageConstructArgs?) -> T,
-                              cont: Continuation<TAndMs<Pair<Long, List<T>>>>) {
-    queue({
-        with(getWriter(TagClient.LastValue)) {
-            val FILTER = 1
-            val JOIN = 2  // TODO: not used
-            val IF_UPDATED_AFTER = 3
-            val VALUE_TAG = 4
-            val EXCLUDE_TAG = 5
-            val EXCLUDE_TOPIC = 6
-            val INCLUDE_ZERO_VALUE = 7
-            val LAST_MESSAGE_PARTS = 8
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(FILTER)
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(IF_UPDATED_AFTER, ifUpdatedAfter)
+suspend fun <T> UserQueue.lastValue(filter: Filter, ifUpdatedAfter: Long, valueTag: String, excludeTag: String, excludeTopic: String,
+                                    includeZeroValue: Boolean, lastMessageParts: Int, cons: (Tag, Long, MessageConstructArgs?) -> T) = queue({
+    with(getWriter(TagClient.LastValue)) {
+        val FILTER = 1
+        val JOIN = 2  // TODO: not used
+        val IF_UPDATED_AFTER = 3
+        val VALUE_TAG = 4
+        val EXCLUDE_TAG = 5
+        val EXCLUDE_TOPIC = 6
+        val INCLUDE_ZERO_VALUE = 7
+        val LAST_MESSAGE_PARTS = 8
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(FILTER)
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(IF_UPDATED_AFTER, ifUpdatedAfter)
 
-            writeField(VALUE_TAG, valueTag)
-            if (!excludeTag.isEmpty())
-                writeField(EXCLUDE_TAG, excludeTag)
-            if (!excludeTopic.isEmpty())
-                writeField(EXCLUDE_TOPIC, excludeTopic)
-            if (includeZeroValue)
-                writeFieldVarint(INCLUDE_ZERO_VALUE, 1L)
-            if (lastMessageParts != 0)
-                writeFieldVarint(LAST_MESSAGE_PARTS, lastMessageParts.toLong())
-            toByteArray()
-        }}, { with(it) {
-            var serverTime: Long = 0
-            val ret = mutableListOf<T>()
-            var lastTagNameValue: Tag? = null
-            var lastDate: Long = 0
-            val args = MessageConstructArgs()
+        writeField(VALUE_TAG, valueTag)
+        if (!excludeTag.isEmpty())
+            writeField(EXCLUDE_TAG, excludeTag)
+        if (!excludeTopic.isEmpty())
+            writeField(EXCLUDE_TOPIC, excludeTopic)
+        if (includeZeroValue)
+            writeFieldVarint(INCLUDE_ZERO_VALUE, 1L)
+        if (lastMessageParts != 0)
+            writeFieldVarint(LAST_MESSAGE_PARTS, lastMessageParts.toLong())
+        toByteArray()
+    }}, { with(it) {
+        var serverTime: Long = 0
+        val ret = mutableListOf<T>()
+        var lastTagNameValue: Tag? = null
+        var lastDate: Long = 0
+        val args = MessageConstructArgs()
 
-            val eor = bufferSize
-            while (position != eor) {
-                val DATE = 3
+        val eor = bufferSize
+        while (position != eor) {
+            val DATE = 3
 
-                val key = readByte().toInt()
-                val field = (key shr 3)
-                when (key and 7) {
-                    WireType.VARINT -> {
-                        val value = readVarint()
-                        if (field == 1)  // SERVER_TIME
-                            serverTime = value
-                    }
-                    WireType.FIXED64 -> skip(8)
-                    WireType.FIXED32 -> skip(4)
-                    WireType.LENGTH_DELIMITED -> {
-                        val len = readVarint().toInt()
-                        when (field) {
-                            2 -> {  // TAG_NAME_VALUE
-                                if (lastTagNameValue != null) {
-                                    val x = cons(lastTagNameValue, lastDate, null)
-                                    if (x != null)
-                                      ret.add(x)
-                                }
-                                lastTagNameValue = tag(len)
-                                lastDate = 0
+            val key = readByte().toInt()
+            val field = (key shr 3)
+            when (key and 7) {
+                WireType.VARINT -> {
+                    val value = readVarint()
+                    if (field == 1)  // SERVER_TIME
+                        serverTime = value
+                }
+                WireType.FIXED64 -> skip(8)
+                WireType.FIXED32 -> skip(4)
+                WireType.LENGTH_DELIMITED -> {
+                    val len = readVarint().toInt()
+                    when (field) {
+                        2 -> {  // TAG_NAME_VALUE
+                            if (lastTagNameValue != null) {
+                                val x = cons(lastTagNameValue, lastDate, null)
+                                if (x != null)
+                                  ret.add(x)
                             }
-                            4 -> {  // LAST_MESSAGE
-                                with(args) { read(len) }
-                                if (lastTagNameValue != null) {
-                                    val x = cons(lastTagNameValue, lastDate, args)
-                                    if (x != null)
-                                      ret.add(x)
-                                    lastTagNameValue = null
-                                }
-                            }
-                            else -> skip(len)
+                            lastTagNameValue = tag(len)
+                            lastDate = 0
                         }
+                        4 -> {  // LAST_MESSAGE
+                            with(args) { read(len) }
+                            if (lastTagNameValue != null) {
+                                val x = cons(lastTagNameValue, lastDate, args)
+                                if (x != null)
+                                  ret.add(x)
+                                lastTagNameValue = null
+                            }
+                        }
+                        else -> skip(len)
                     }
                 }
             }
-            if (lastTagNameValue != null) { // flush
-                val x = cons(lastTagNameValue, lastDate, null)
-                if (x != null)
-                  ret.add(x)
-            }
-            Pair(serverTime, ret)
-        } }, null, cont)
-}
+        }
+        if (lastTagNameValue != null) { // flush
+            val x = cons(lastTagNameValue, lastDate, null)
+            if (x != null)
+              ret.add(x)
+        }
+        Pair(serverTime, ret)
+    } })
 
 
 // Specifics

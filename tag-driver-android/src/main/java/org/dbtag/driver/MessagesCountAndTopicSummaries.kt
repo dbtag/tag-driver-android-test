@@ -5,24 +5,22 @@ import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.Continuation
 
-fun UserQueue.messagesCountAndTopicSummaries(filter: Filter, ifUpdatedAfter: Long, specificValueTag: String = "",
-                                         limitPerTopic: Int, cont: Continuation<TAndMs<MessagesCountAndTopicSummaries>>) {
-    queue({
-        with(getWriter(TagClient.TopicSummaries)) {
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(2, ifUpdatedAfter) // IF_UPDATED_AFTER
-            if (!specificValueTag.isEmpty())
-                writeField(3, specificValueTag) // SPECIFIC_VALUE_TAG
-            if (limitPerTopic != 0)
-                writeFieldVarint(4, limitPerTopic.toLong()) // LIMIT_PER_TOPIC
-            toByteArray()
-        }}, { it.messagesCountAndTopicSummaries() }, null, cont)
-}
+suspend fun UserQueue.messagesCountAndTopicSummaries(filter: Filter, ifUpdatedAfter: Long,
+                                                     specificValueTag: String = "", limitPerTopic: Int) = queue({
+    with(getWriter(TagClient.TopicSummaries)) {
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(2, ifUpdatedAfter) // IF_UPDATED_AFTER
+        if (!specificValueTag.isEmpty())
+            writeField(3, specificValueTag) // SPECIFIC_VALUE_TAG
+        if (limitPerTopic != 0)
+            writeFieldVarint(4, limitPerTopic.toLong()) // LIMIT_PER_TOPIC
+        toByteArray()
+    }}, { it.messagesCountAndTopicSummaries() })
 
 
 private fun BinaryReader.messagesCountAndTopicSummaries(): MessagesCountAndTopicSummaries {

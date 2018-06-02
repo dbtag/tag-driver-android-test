@@ -86,25 +86,19 @@ class MessageBuilder {
     }
 }
 
-suspend fun UserQueue.insert(message: MessageBuilder) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(message, cont) }
-
-private fun UserQueue.insert(message: MessageBuilder, cont: Continuation<TAndMs<IntArray>>) {
+suspend fun UserQueue.insert(message: MessageBuilder)  {
     // TODO: any mb attachments are not passed
     val text = message.writeShort()
-    insert(text, cont = cont)
+    insert(text)
 }
 
-suspend fun UserQueue.insert(text: String, vararg attachments: ByteArray) = suspendCoroutine<TAndMs<IntArray>> { cont-> insert(text, *attachments, cont = cont) }
-
-internal fun UserQueue.insert(text: String, vararg attachments: ByteArray, cont: Continuation<TAndMs<IntArray>>) {
-    queue({
-        with(getWriter(TagClient.Insert)) {
-            writeField(1, text)  // TEXT
-            for (attachment in attachments)
-                writeField(2, attachment) // ATTACHMENT
-            toByteArray()
-        }}, { it.messagesIds(it.unreadBytesCount()) }, null, cont)
-}
+suspend fun UserQueue.insert(text: String, vararg attachments: ByteArray) = queue({
+    with(getWriter(TagClient.Insert)) {
+        writeField(1, text)  // TEXT
+        for (attachment in attachments)
+            writeField(2, attachment) // ATTACHMENT
+        toByteArray()
+    }}, { it.messagesIds(it.unreadBytesCount()) })
 
 
 private fun BinaryReader.messagesIds(len: Int): IntArray {

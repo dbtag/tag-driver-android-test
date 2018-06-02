@@ -4,16 +4,14 @@ import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun UserQueue.insertCredentials(password: String, extraText: String) = suspendCoroutine<TAndMs<Int>> { cont->
-    queue( {
-        with(getWriter(TagClient.InsertCredentials)) {
-            if (password.isNotEmpty())
-              writeField(1, password) // PASSWORD
-            if (extraText.isNotEmpty())
-              writeField(2, extraText) // EXTRATEXT
-            toByteArray()
-        }}, { it.createUserResults() }, null, cont)
-}
+suspend fun UserQueue.insertCredentials(password: String, extraText: String) = queue( {
+    with(getWriter(TagClient.InsertCredentials)) {
+        if (password.isNotEmpty())
+          writeField(1, password) // PASSWORD
+        if (extraText.isNotEmpty())
+          writeField(2, extraText) // EXTRATEXT
+        toByteArray()
+    }}, { it.createUserResults() })
 
 
 private fun BinaryReader.createUserResults() : Int {

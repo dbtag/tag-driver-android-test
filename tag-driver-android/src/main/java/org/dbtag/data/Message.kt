@@ -1,9 +1,9 @@
 package org.dbtag.data
 
-import org.dbtag.driver.*
+import org.dbtag.driver.Parts
+import org.dbtag.driver.UserQueue
+import org.dbtag.driver.select
 import java.util.concurrent.Executor
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 /**
  * Just enough about a message to keep up-to-date and notify about changes
@@ -73,16 +73,9 @@ class Message(args: MessageConstructArgs) : MidiMessage(args) {
         const val parts = Parts.All
 
         suspend fun select(queue: UserQueue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
-                           desc: Boolean = false, executor: Executor? = null) = suspendCoroutine< TAndMs<MessagesData<Message>>> { cont->
-            select(queue, filter, limit, ifUpdatedAfter, desc, executor, cont)
-        }
-
-        fun select(queue: UserQueue, filter: Filter, limit: Int = Integer.MAX_VALUE, ifUpdatedAfter: Long = 0L,
-                   desc: Boolean = false, executor: Executor? = null, cont: Continuation<TAndMs<MessagesData<Message>>>) {
-            queue.select(filter, 0, Filter.empty, limit, ifUpdatedAfter, desc, Parts.All, { args: MessageConstructArgs ->
-                Message(args)
-            }, executor, cont)
-        }
+                           desc: Boolean = false, executor: Executor? = null) =
+                queue.select(filter, 0, Filter.empty, limit, ifUpdatedAfter, desc, Parts.All,
+                        { args -> Message(args) }, executor)
     }
 
     //  public final @NonNull String toAddress;

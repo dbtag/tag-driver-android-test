@@ -3,28 +3,21 @@ package org.dbtag.driver
 import org.dbtag.data.Attachment
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 /**
  * Gets the bytes of an attachment to a message, by index starting from 0.
  * We don't cache these as they could be big.
  */
-suspend fun UserQueue.attachment(mid: Int, comment: Int, index: Int) = suspendCoroutine<TAndMs<Attachment>>
-  { cont-> attachment(mid, comment, index, cont) }
-
-fun UserQueue.attachment(mid: Int, comment: Int, index: Int, cont: Continuation<TAndMs<Attachment>>) {
-    queue({
-        with(getWriter(TagClient.Attachment)) {
-            writeFieldVarint(1, mid.toLong())     // MID
-            writeFieldVarint(2, comment.toLong()) // COMMENT
-            writeFieldVarint(3, index.toLong())   // INDEX
-            toByteArray()
-            }}, { it.attachment() }, null, cont)
-}
+suspend fun UserQueue.attachment(mid: Int, comment: Int, index: Int) = queue({
+    with(getWriter(TagClient.Attachment)) {
+        writeFieldVarint(1, mid.toLong())     // MID
+        writeFieldVarint(2, comment.toLong()) // COMMENT
+        writeFieldVarint(3, index.toLong())   // INDEX
+        toByteArray()
+        }}, { it.attachment() })
 
 
-internal fun BinaryReader.attachment(): Attachment {
+private fun BinaryReader.attachment(): Attachment {
     var name = ""
     var bytes = ByteArray(0)
     val eor = bufferSize

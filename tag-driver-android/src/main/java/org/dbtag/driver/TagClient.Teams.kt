@@ -18,95 +18,85 @@ data class Team(val team: Tag, val members: List<U2>, val managers: List<U2>,
                 val following: List<Tag>, val followingWithNotifications: List<Tag>)
 
 
-/**
- * Gets all [Team]s in alphabetical team-name order
- */
-suspend fun UserQueue.getTeams() = suspendCoroutine<List<Team>> { cont-> getTeams(cont) }
-
 
 enum class FollowMethod { Unknown, NoFollow, Follow, FollowWithNotifications }
 
 /**
- * Gets all [Team]s
+ * Gets all [Team]s in alphabetical team-name order
  */
-fun UserQueue.getTeams(cont: Continuation<List<Team>>) {
-    select(Filter(listOf(Tag("team")), listOf(Tag("sys.n"))), 0, Filter.empty, 100000, 0, false, Parts.Content, { it.content }, null,
-            object : Continuation<TAndMs<MessagesData<String>>> {
-                override val context = EmptyCoroutineContext
-                override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
-                override fun resume(value: TAndMs<MessagesData<String>>) {
-                    val usersCache = mutableMapOf<String, U2>()  // TODO: should pull in the pre-existing users
-                    data class ParsedTeam(val team: Tag, var deleted: Boolean,
-                                          val members: MutableSet<U2>, val managers: MutableSet<U2>,
-                                          val followingValues: MutableMap<Tag, Boolean>)
-                    val teams = mutableMapOf<Tag, ParsedTeam>()
+suspend fun UserQueue.getTeams() : List<Team> {
+    val contents = select(Filter(listOf(Tag("team")), listOf(Tag("sys.n"))), 0, Filter.empty, 100000, 0, false, Parts.Content, { it.content }).messages
+    val usersCache = mutableMapOf<String, U2>()  // TODO: should pull in the pre-existing users
 
-                    for (content in value.t.messages) {
-                        val tags = content.parseTagsOnly()
-                        val teamTag = tags.firstOrNull({ it.topic == "team" }) ?: continue
+    data class ParsedTeam(val team: Tag, var deleted: Boolean,
+                          val members: MutableSet<U2>, val managers: MutableSet<U2>,
+                          val followingValues: MutableMap<Tag, Boolean>)
+    val teams = mutableMapOf<Tag, ParsedTeam>()
 
-                        // Get the [ParsedTeam] to work on
-                        with (teams[teamTag] ?: ParsedTeam(teamTag, false, mutableSetOf(), mutableSetOf(), mutableMapOf()).apply { teams[teamTag] = this }) {
-                            if (teamTag.value == 0.0)
-                                deleted = true
-                            else {
-                                var seenManager = false
-                                var follow = FollowMethod.Unknown
-                                for (tag in tags) when {
-                                    tag.tag == "sys.manager" -> seenManager = true
-                                    tag.tag == "sys.f" -> follow = when(tag.value) {
-                                        0.0 -> FollowMethod.NoFollow
-                                        2.0 -> FollowMethod.FollowWithNotifications
-                                        else -> FollowMethod.Follow
-                                    }
-                                    tag.topic == "user" -> {
-                                        val userCode = tag.code
-                                        val u2 = usersCache[userCode] ?: U2(Tag(tag.tag, tag.name)).apply { usersCache.put(userCode, this) }
-                                        if (seenManager) {
-                                            if (tag.value == 0.0)
-                                                managers.remove(u2)
-                                            else
-                                                managers.add(u2)
-                                        } else {
-                                            if (tag.value == 0.0)
-                                                members.remove(u2)
-                                            else
-                                                members.add(u2)
-                                        }
-                                    }
-                                    else -> {
-                                        if (follow != FollowMethod.Unknown) {
-                                            followingValues.remove(tag)
-                                            val follow2 = if (tag.hasValue) when (tag.value) {
-                                                    0.0 -> FollowMethod.NoFollow
-                                                    2.0 -> FollowMethod.FollowWithNotifications
-                                                    else -> FollowMethod.Follow
-                                            } else
-                                                follow
-                                            if (follow2 != FollowMethod.NoFollow)
-                                                followingValues[tag] = (follow2 == FollowMethod.FollowWithNotifications)
-                                        }
+    for (content in contents) {
+        val tags = content.parseTagsOnly()
+        val teamTag = tags.firstOrNull({ it.topic == "team" }) ?: continue
 
-                                    }
-                                }
-                            }
+        // Get the [ParsedTeam] to work on
+        with (teams[teamTag] ?: ParsedTeam(teamTag, false, mutableSetOf(), mutableSetOf(), mutableMapOf()).apply { teams[teamTag] = this }) {
+            if (teamTag.value == 0.0)
+                deleted = true
+            else {
+                var seenManager = false
+                var follow = FollowMethod.Unknown
+                for (tag in tags) when {
+                    tag.tag == "sys.manager" -> seenManager = true
+                    tag.tag == "sys.f" -> follow = when(tag.value) {
+                        0.0 -> FollowMethod.NoFollow
+                        2.0 -> FollowMethod.FollowWithNotifications
+                        else -> FollowMethod.Follow
+                    }
+                    tag.topic == "user" -> {
+                        val userCode = tag.code
+                        val u2 = usersCache[userCode] ?: U2(Tag(tag.tag, tag.name)).apply { usersCache.put(userCode, this) }
+                        if (seenManager) {
+                            if (tag.value == 0.0)
+                                managers.remove(u2)
+                            else
+                                managers.add(u2)
+                        } else {
+                            if (tag.value == 0.0)
+                                members.remove(u2)
+                            else
+                                members.add(u2)
                         }
                     }
-                    val newTeams = mutableListOf<Team>()
-                    for ((_, team) in teams) with(team) {
-                        if (!deleted)
-                            newTeams.add(Team(
-                                    this.team,
-                                    members.toMutableList().apply { sortBy({ it.tag }) },
-                                    managers.toMutableList().apply { sortBy({ it.tag }) },
-                                    followingValues.filter { !it.value }.mapTo(mutableListOf(), { it.key }).apply { sort() },
-                                    followingValues.filter { it.value }.mapTo(mutableListOf(), { it.key }).apply { sort() }))
-                    }
-                    newTeams.sortBy({ it.team })  // effectively sorts alphabetically by team name
-                    cont.resume(newTeams)
-                }
+                    else -> {
+                        if (follow != FollowMethod.Unknown) {
+                            followingValues.remove(tag)
+                            val follow2 = if (tag.hasValue) when (tag.value) {
+                                    0.0 -> FollowMethod.NoFollow
+                                    2.0 -> FollowMethod.FollowWithNotifications
+                                    else -> FollowMethod.Follow
+                            } else
+                                follow
+                            if (follow2 != FollowMethod.NoFollow)
+                                followingValues[tag] = (follow2 == FollowMethod.FollowWithNotifications)
+                        }
 
-            })
+                    }
+                }
+            }
+        }
+    }
+
+    val newTeams = mutableListOf<Team>()
+    for ((_, team) in teams) with(team) {
+        if (!deleted)
+            newTeams.add(Team(
+                    this.team,
+                    members.toMutableList().apply { sortBy({ it.tag }) },
+                    managers.toMutableList().apply { sortBy({ it.tag }) },
+                    followingValues.filter { !it.value }.mapTo(mutableListOf(), { it.key }).apply { sort() },
+                    followingValues.filter { it.value }.mapTo(mutableListOf(), { it.key }).apply { sort() }))
+    }
+    newTeams.sortBy({ it.team })  // effectively sorts alphabetically by team name
+    return newTeams
 }
 
 

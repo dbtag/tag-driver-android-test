@@ -3,42 +3,31 @@ package org.dbtag.driver
 import org.dbtag.data.*
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
-
-suspend fun UserQueue.topicsReply(filter: Filter) = suspendCoroutine<TAndMs<TopicsReply<Tag>>>
-  { cont-> topicsReply(filter, 0L, Parts.None, { tag, _ -> tag } ,  cont) }
-
-suspend fun <T> UserQueue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
-                                  cons: (Tag, MessageConstructArgs?) -> T) = suspendCoroutine<TAndMs<TopicsReply<T>>>
-  { cont-> topicsReply(filter, ifUpdatedAfter, lastMessageParts, cons,  cont) }
 
 /**
  * Gets all items.
  * @param ifUpdatedAfter  If this is non-zero, then nothing is returned unless newer dataPoints_ exist.
  */
-fun <T> UserQueue.topicsReply(filter: Filter, ifUpdatedAfter: Long, lastMessageParts: Int,
-                          cons: (Tag, MessageConstructArgs?) -> T, cont: Continuation<TAndMs<TopicsReply<T>>>) {
-    queue({
-        with(getWriter(TagClient.Topics)) {
-            //val JOIN = 2
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(3, ifUpdatedAfter) // IF_UPDATED_AFTER
+suspend fun <T> UserQueue.topics(filter: Filter = Filter.empty, ifUpdatedAfter: Long = 0L, lastMessageParts: Int = 0,
+                                 cons: (Tag, MessageConstructArgs?) -> T) = queue({
+    with(getWriter(TagClient.Topics)) {
+        //val JOIN = 2
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(3, ifUpdatedAfter) // IF_UPDATED_AFTER
 
-            if (lastMessageParts != 0)
-                writeFieldVarint(4, lastMessageParts.toLong()) // LAST_MESSAGE_PARTS
-            toByteArray()
-        }}, { it.topicsReply(cons) }, null, cont)
-}
+        if (lastMessageParts != 0)
+            writeFieldVarint(4, lastMessageParts.toLong()) // LAST_MESSAGE_PARTS
+        toByteArray()
+    }}, { it.topics(cons) })
 
 
-private fun <T> BinaryReader.topicsReply(cons: (Tag, MessageConstructArgs?) -> T) : TopicsReply<T> {
+private fun <T> BinaryReader.topics(cons: (Tag, MessageConstructArgs?) -> T) : TopicsReply<T> {
     var serverTime: Long = 0
     var lastTopic: Tag? = null
     val args = MessageConstructArgs()

@@ -1,25 +1,18 @@
 package org.dbtag.driver
 
 import org.dbtag.data.CodesSimpleResult
-import org.dbtag.data.tag
 import org.dbtag.data.Tag
+import org.dbtag.data.tag
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun UserQueue.codesSimpleResult(topic: String, limit: Int, code0: String = "") = suspendCoroutine<TAndMs<CodesSimpleResult>>
-  { cont-> codesSimpleResult(topic, limit, code0, cont) }
-
-fun UserQueue.codesSimpleResult(topic: String, limit: Int, code0: String = "", cont: Continuation<TAndMs<CodesSimpleResult>>) {
-    queue({
-        with(getWriter(TagClient.CodesSimple)) {
-            writeField(1, topic) // TOPIC
-            writeFieldVarint(2, limit.toLong()) // LIMIT
-            if (!code0.isEmpty())
-                writeField(3, code0)  // CODE0
-            toByteArray()
-        } }, { it.codesSimpleResult() }, null, cont)
-}
+suspend fun UserQueue.codesSimpleResult(topic: String, limit: Int, code0: String = "") = queue({
+    with(getWriter(TagClient.CodesSimple)) {
+        writeField(1, topic) // TOPIC
+        writeFieldVarint(2, limit.toLong()) // LIMIT
+        if (!code0.isEmpty())
+            writeField(3, code0)  // CODE0
+        toByteArray()
+    } }, { it.codesSimpleResult() })
 
 
 private fun BinaryReader.codesSimpleResult(): CodesSimpleResult {

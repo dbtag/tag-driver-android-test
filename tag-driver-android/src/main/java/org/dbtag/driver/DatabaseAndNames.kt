@@ -1,25 +1,16 @@
 package org.dbtag.driver
 
-import org.dbtag.data.ServerDatabases
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
-
-suspend inline fun Queue.databases() = suspendCoroutine<TAndMs<ServerDatabases>> { cont-> databases(cont) }
-
-fun Queue.databases(cont: Continuation<TAndMs<ServerDatabases>>) {
-    queue({
-        with(getWriter0(TagClient.Databases)) {
-            toByteArray()
-        }
-    }, { it.databaseAndNames() }, null, cont)
-}
 
 
-internal fun BinaryReader.databaseAndNames(): ServerDatabases {
-    // var host = ""
-    val databases = mutableListOf<String>()
+/**
+ * Gets the databases.
+ */
+suspend fun Queue.databases() = queue({
+        getWriter0(TagClient.Databases).toByteArray()},  { it.databases() })
+
+private fun BinaryReader.databases() : List<String> = mutableListOf<String>().apply {
     val eor = bufferSize
     while (position != eor) {
         val key = readByte().toInt()
@@ -32,11 +23,10 @@ internal fun BinaryReader.databaseAndNames(): ServerDatabases {
                 val len = readVarint().toInt()
                 when (field) {
                     // 1 -> host = readString(len) // HOST   TODO: this is never returned by servers so remove it
-                    2 -> databases.add(readString(len)) // DATABASE
+                    2 -> add(readString(len)) // DATABASE
                     else -> skip(len)
                 }
             }
         }
     }
-    return ServerDatabases(databases)
 }

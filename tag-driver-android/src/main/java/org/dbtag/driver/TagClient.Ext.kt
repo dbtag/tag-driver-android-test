@@ -1,6 +1,9 @@
 package org.dbtag.driver
 
+import android.net.Uri
 import org.dbtag.data.Filter
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -55,42 +58,15 @@ suspend fun UserQueue.busyDays(filter: Filter, startDay: Int, endDay: Int, timeZ
 //      });
 //    }
 
-///**
-// * Saves all a message's attachments as files to the cacheDir and returns an array of URI's that points to those files.
-// */
-//suspend fun UserQueue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String) = suspendCoroutine<List<Uri>>
-//  { cont-> saveAttachments(mid, attachmentCount, cacheDir, cont) }
-//
-//fun UserQueue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String, cont: Continuation<List<Uri>>) {
-//    object : Any() {
-//        private val uris = mutableListOf<Uri>()
-//        private var index = 0
-//
-//        private val nextCont = object: Continuation<TAndMs<Attachment>> {
-//            override val context = cont.context
-//            override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
-//            override fun resume(value: TAndMs<Attachment>) {
-//                val result = value.t
-//                val attachmentName = result.name
-//                uris.add(Uri.parse("contentAsSpanned://" + CachedFileProvider.AUTHORITY + "/" + attachmentName)) //  + "#" + result.mime))
-//                try {
-//                    val os = FileOutputStream(cacheDir + File.separator + "attachmentName")  // attachmentName may contain bad file chars
-//                    os.write(result.bytes)
-//                    os.close()
-//                    next()
-//                } catch (e: Exception) {
-//                    cont.resumeWithException(e)
-//                }
-//
-//            }
-//        }
-//
-//        internal operator fun next() {
-//            // Load the bytes for the attachments
-//            if (index != attachmentCount)
-//                attachment(mid, 0, index, nextCont)
-//            else
-//                cont.resume(uris)
-//        }
-//    }.next()
-//}
+/**
+ * Saves all a message's attachments as files to the cacheDir and returns an array of URI's that points to those files.
+ */
+suspend fun UserQueue.saveAttachments(mid: Int, attachmentCount: Int, cacheDir: String) =
+    (0 until attachmentCount).map { index ->
+        val result = attachment(mid, 0, index)
+        val attachmentName = result.name
+        val os = FileOutputStream(cacheDir + File.separator + "attachmentName")  // TODO: attachmentName may contain bad file chars
+        os.write(result.bytes)
+        os.close()
+        Uri.parse("contentAsSpanned://" + "CachedFileProvider.AUTHORITY" + "/" + attachmentName)!! //  + "#" + result.mime))
+    }

@@ -5,32 +5,25 @@ import org.dbtag.data.PairData
 import org.dbtag.data.write
 import org.dbtag.protobuf.WireType
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.Continuation
-import kotlin.coroutines.experimental.suspendCoroutine
 
 /**
  * The [topics] are also kind of a toFilter, because all we are returning is how many matches per pair of tags
  * i.e. not worth keeping ...
  */
-suspend fun UserQueue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>) = suspendCoroutine<TAndMs<PairData>>
-    { cont-> pairsCount(filter, ifUpdatedAfter, topics, cont) }
-
-fun UserQueue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>, cont: Continuation<TAndMs<PairData>>)  {
-    queue({
-        with(getWriter(TagClient.PairsCount)) {
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            if (ifUpdatedAfter != 0L)
-                writeFieldFixed64(2, ifUpdatedAfter)  // IF_UPDATED_AFTER
-            topics.forEach({
-                writeField(3, it)  // TOPIC
-            })
-            toByteArray()
-        }}, { it.pairsCount(it.unreadBytesCount()) }, null, cont)
-}
+suspend fun UserQueue.pairsCount(filter: Filter, ifUpdatedAfter: Long, topics: List<String>) = queue({
+    with(getWriter(TagClient.PairsCount)) {
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        if (ifUpdatedAfter != 0L)
+            writeFieldFixed64(2, ifUpdatedAfter)  // IF_UPDATED_AFTER
+        topics.forEach({
+            writeField(3, it)  // TOPIC
+        })
+        toByteArray()
+    }}, { it.pairsCount(it.unreadBytesCount()) })
 
 
 internal fun BinaryReader.pairsCount(len: Int) : PairData {

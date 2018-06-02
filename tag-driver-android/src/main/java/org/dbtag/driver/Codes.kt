@@ -2,46 +2,33 @@ package org.dbtag.driver
 
 import org.dbtag.data.*
 import org.dbtag.socketComs.BinaryReader
-import kotlin.coroutines.experimental.suspendCoroutine
 
 enum class CodeSort(val v: Int) {
     Code(0), Name(1), Posts(2), Tagged(3), MRT(4), TopicDuration(5),
     TotalTagValue(6), FirstTopicName(7), Q2Duration(8) }
 
 suspend fun UserQueue.codes(filter: Filter, topic: String, joinTopic: String, limit: Int,
-                        sort: CodeSort, sortTopic: String, desc: Boolean,
-                        code0: String) = suspendCoroutine<TAndMs<CodesResult>> { cont->
-
-//    Filter = 1
-//    Topic
-//    JoinTopic
-//    Limit
-//    Sort
-//    SortTopic
-//    Desc
-//    Code0
-
-    queue({
-        with(getWriter(TagClient.Codes)) {
-            if (filter !== Filter.empty) {
-                val emb = embeddedField(1) // FILTER
-                filter.write(this)
-                emb.close()
-            }
-            writeField(2, topic) // TOPIC
-            if (!joinTopic.isEmpty())
-                writeField(3, joinTopic) // JOINTOPIC
-            writeFieldVarint(4, limit.toLong()) // LIMIT
-            writeFieldVarint(5, sort.v.toLong()) // SORT
-            if (!sortTopic.isEmpty())
-                writeField(6, sortTopic) // SORTTOPIC
-            if (desc)
-                writeFieldVarint(7, 1L) // DESC
-            if (!code0.isEmpty())
-                writeField(8, code0)  // CODE0
-            toByteArray()
-        } }, { it.codesResult() }, null, cont)
-}
+                            sort: CodeSort, sortTopic: String, desc: Boolean,
+                            code0: String) = queue({
+    with(getWriter(TagClient.Codes)) {
+        if (filter !== Filter.empty) {
+            val emb = embeddedField(1) // FILTER
+            filter.write(this)
+            emb.close()
+        }
+        writeField(2, topic) // TOPIC
+        if (!joinTopic.isEmpty())
+            writeField(3, joinTopic) // JOINTOPIC
+        writeFieldVarint(4, limit.toLong()) // LIMIT
+        writeFieldVarint(5, sort.v.toLong()) // SORT
+        if (!sortTopic.isEmpty())
+            writeField(6, sortTopic) // SORTTOPIC
+        if (desc)
+            writeFieldVarint(7, 1L) // DESC
+        if (!code0.isEmpty())
+            writeField(8, code0)  // CODE0
+        toByteArray()
+    } }, { it.codesResult() })
 
 
 private fun BinaryReader.codesResult(): CodesResult {
@@ -204,4 +191,3 @@ private fun BinaryReader.tv(len: Int): TV {
     }
     return TV(tag, count, sum, values, unit)
 }
-

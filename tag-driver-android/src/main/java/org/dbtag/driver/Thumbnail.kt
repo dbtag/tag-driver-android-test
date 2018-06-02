@@ -6,20 +6,14 @@ import java.io.EOFException
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
-suspend fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int) = suspendCoroutine<TAndMs<ByteArray>> { cont->
-    thumbnail(mid, comment, index, maxSize, cont)
-}
-
-fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int, cont: Continuation<TAndMs<ByteArray>>) {
-    queue({
-        with(getWriter(TagClient.Thumbnail)) {
-            writeFieldVarint(1, mid.toLong())      // MID
-            writeFieldVarint(2, comment.toLong())  // COMMENT
-            writeFieldVarint(3, index.toLong())    // INDEX
-            writeFieldVarint(4, maxSize.toLong())  // MAX_SIZE
-            toByteArray()
-        }}, { it.thumbnailBytes(it.bufferSize - it.position) }, null, cont)
-}
+suspend fun UserQueue.thumbnail(mid: Int, comment: Int, index: Int, maxSize: Int) = queue({
+    with(getWriter(TagClient.Thumbnail)) {
+        writeFieldVarint(1, mid.toLong())      // MID
+        writeFieldVarint(2, comment.toLong())  // COMMENT
+        writeFieldVarint(3, index.toLong())    // INDEX
+        writeFieldVarint(4, maxSize.toLong())  // MAX_SIZE
+        toByteArray()
+    }}, { it.thumbnailBytes(it.bufferSize - it.position) })
 
 fun BinaryReader.thumbnailBytes(len: Int): ByteArray {
     var bytes: ByteArray? = null

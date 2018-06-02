@@ -4,7 +4,9 @@ import org.dbtag.data.Tag
 import org.dbtag.socketComs.*
 import java.util.concurrent.Executor
 import kotlin.coroutines.experimental.Continuation
+import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.EmptyCoroutineContext
+import kotlin.coroutines.experimental.suspendCoroutine
 
 
 typealias ResultCallback<T> = (Exception?, T?) -> Unit
@@ -17,7 +19,17 @@ interface Queue {
     fun <T> queue(getBuffer: GetBuffer, cons: (BinaryReader) -> T, executor: Executor?,  cont: Continuation<TAndMs<T>>)
     }
 
-// Knows it user and has an access token
+// TODO: just for now, strips out the Ms part which is going to go completely soon
+suspend fun <T> Queue.queue(getBuffer: GetBuffer, cons: (BinaryReader) -> T, executor: Executor? = null) : T =
+        suspendCoroutine { cont -> queue(getBuffer, cons, executor,
+                object: Continuation<TAndMs<T>> {
+                    override val context = cont.context
+                    override fun resume(value: TAndMs<T>) = cont.resume(value.t)
+                    override fun resumeWithException(exception: Throwable) = cont.resumeWithException(exception)
+                }) }
+
+
+// Knows its user and has an access token
 interface UserQueue : Queue {
     val user: Tag
     fun getWriter(command: Int): BinaryWriter
